@@ -358,6 +358,144 @@ def unfollow_author(name: str) -> dict[str, Any]:
         conn.close()
 
 
+# ------------------------------------------------------------------------ prompts
+#
+# A prompt is a workflow the user starts deliberately — a slash command rather
+# than something the model decides to do. These are not static templates: each
+# one reads the database first and hands over the evidence already gathered, so
+# the conversation opens with the facts in hand instead of spending three tool
+# calls collecting them. Each ends by asking for confirmation before writing,
+# because the user invoked a discussion, not an edit.
+
+
+@server.prompt(
+    title="Refresh my interest profile",
+    description="Rewrite the interest profile from everything read and rated "
+    "since it was last written.",
+)
+def refresh_profile() -> str:
+    conn = _conn()
+    try:
+        current = profile.current(conn)
+        steer = profile.parse(current.content if current else None)
+        pending = profile.feedback_since_last_profile(conn)
+        brief = profile.briefing(conn)
+    finally:
+        conn.close()
+
+    if not brief:
+        return (
+            "My research advisor has nothing to write a profile from yet — no "
+            "papers in the library. Tell me to add some reading first, with "
+            "`advisor add` or the /add page."
+        )
+
+    if current:
+        standing = (
+            f"My current profile was written on {current.created_at[:10]}. "
+            f"I have rated {pending} paper(s) since.\n\n"
+            f"It currently steers retrieval toward {steer.more or 'nothing'} "
+            f"and away from {steer.less or 'nothing'}.\n\n"
+            f"--- current profile ---\n{current.content}\n--- end ---\n\n"
+        )
+        task = (
+            "Revise it against the evidence below. Keep what still holds and "
+            "change only what the evidence contradicts — this is an edit, not "
+            "a fresh start."
+        )
+    else:
+        standing = "I have no interest profile yet.\n\n"
+        task = "Write my first one from the evidence below."
+
+    return (
+        f"{standing}{task}\n\n"
+        "Before you write the steering lines, use `search_corpus` to check that "
+        "the phrasing you are about to use matches how the literature actually "
+        "names itself — those lines are encoded and used as search directions, "
+        "so a phrase nobody writes retrieves nothing.\n\n"
+        "Show me the draft and what it would change about my steering. Save it "
+        "with `write_interest_profile` only after I say so.\n\n"
+        f"{brief}"
+    )
+
+
+@server.prompt(
+    title="Explore a new direction",
+    description="Work out what a topic is really called, and steer the advisor "
+    "toward it.",
+)
+def explore(topic: str) -> str:
+    conn = _conn()
+    try:
+        current = profile.current(conn)
+        steer = profile.parse(current.content if current else None)
+        hits = fts.search(conn, topic, limit=12)
+        total = fts.count(conn, topic)
+    finally:
+        conn.close()
+
+    found = (
+        "\n".join(
+            f"- {hit.title} ({(hit.published_at or '')[:4]}) — {hit.authors}"
+            for hit in hits
+        )
+        or "Nothing matched that phrase, which is itself informative: either the "
+        "corpus does not cover it, or the field calls it something else."
+    )
+
+    return (
+        f"I want to read more about {topic}.\n\n"
+        f"My profile currently steers toward {steer.more or 'nothing in particular'}"
+        f" and away from {steer.less or 'nothing'}.\n\n"
+        f"A search for “{topic}” in my corpus returns {total} papers. The first "
+        f"few:\n\n{found}\n\n"
+        "Help me work out whether this is worth steering toward, and what to "
+        "call it. Search again with the vocabulary those titles actually use — "
+        "my phrasing is probably not the field's. Then propose the exact "
+        "`## More of` lines to add, written like paper titles rather than like "
+        "sentences about me.\n\n"
+        "Tell me what I would stop seeing as a result. Do not save anything "
+        "until I agree to it."
+    )
+
+
+@server.prompt(
+    title="Go through my feed",
+    description="Review what the advisor is currently recommending, and why.",
+)
+def review_feed() -> str:
+    conn = _conn()
+    try:
+        rows = pipeline.latest(conn)
+        library_size = conn.execute("SELECT count(*) FROM library").fetchone()[0]
+    finally:
+        conn.close()
+
+    if not rows:
+        return (
+            "My advisor has nothing in its feed right now. Check "
+            "`preview_recommendations` to see whether that is because there is "
+            "nothing to suggest or because no batch has been generated, and "
+            "tell me which."
+        )
+
+    listing = "\n".join(
+        f"{row['rank']}. {row['title']}\n   why: {row['rationale'] or 'no reason recorded'}"
+        for row in rows
+    )
+
+    return (
+        f"Here is what my research advisor is recommending. I have "
+        f"{library_size} paper(s) in my library.\n\n{listing}\n\n"
+        "Go through these with me. For any you cannot judge from the title, "
+        "read the abstract with `paper`. I want to know which are worth my "
+        "time and which are noise — and if several are noise for the same "
+        "reason, say what that reason is and whether a `## Less of` line would "
+        "prevent it. Be blunt; a list where everything is interesting is no "
+        "use to me."
+    )
+
+
 # ------------------------------------------------------------------------- config
 
 

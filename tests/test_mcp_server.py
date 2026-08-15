@@ -188,3 +188,92 @@ async def test_a_missing_paper_reports_rather_than_crashes(seeded: str) -> None:
             result = payload(await session.call_tool("paper", {"paper_id": 999999}))
 
     assert "error" in result
+
+
+# ------------------------------------------------------------------------ prompts
+
+
+async def test_prompts_are_advertised_with_their_arguments(seeded: str) -> None:
+    async with stdio_client(client_for(seeded)) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            listing = await session.list_prompts()
+
+    prompts = {p.name: p for p in listing.prompts}
+    assert set(prompts) == {"refresh_profile", "explore", "review_feed"}
+    assert all(p.description for p in listing.prompts)
+
+    # A prompt taking a topic must declare it, or the client cannot ask for it.
+    topic = [a for a in prompts["explore"].arguments if a.name == "topic"]
+    assert topic and topic[0].required
+
+
+def rendered(result) -> str:
+    return "".join(
+        m.content.text for m in result.messages if m.content.type == "text"
+    )
+
+
+async def test_refresh_profile_carries_the_evidence(seeded: str) -> None:
+    """The point of a prompt over a bare instruction: it arrives loaded.
+
+    If the evidence is not embedded, the conversation opens by spending three
+    tool calls gathering what the server already had to hand.
+    """
+    async with stdio_client(client_for(seeded)) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            text = rendered(await session.get_prompt("refresh_profile", {}))
+
+    assert "no interest profile yet" in text
+    assert "Doubly-Efficient PIR From Ring Learning" in text, "library must be included"
+    assert "## More of" in text, "the house rules for writing one must be included"
+    assert "only after I say so" in text, "a prompt must not authorise a silent write"
+
+
+async def test_refresh_profile_revises_rather_than_replaces(seeded: str) -> None:
+    async with stdio_client(client_for(seeded)) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            await session.call_tool(
+                "write_interest_profile",
+                {"content": "## Working on\nPIR.\n\n## More of\nlattice PIR\n"},
+            )
+            text = rendered(await session.get_prompt("refresh_profile", {}))
+
+    assert "lattice PIR" in text, "the current profile must be shown"
+    assert "an edit, not" in text
+
+
+async def test_explore_searches_before_it_asks(seeded: str) -> None:
+    """The topic is looked up here, so the model starts from real titles."""
+    async with stdio_client(client_for(seeded)) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            text = rendered(
+                await session.get_prompt("explore", {"topic": "succinct arguments"})
+            )
+
+    assert "Succinct Arguments for Verifiable Computation" in text
+    assert "returns 1 papers" in text
+
+
+async def test_explore_says_so_when_nothing_matches(seeded: str) -> None:
+    """A miss is information, not an error."""
+    async with stdio_client(client_for(seeded)) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            text = rendered(
+                await session.get_prompt("explore", {"topic": "zzzznotathing"})
+            )
+
+    assert "Nothing matched" in text
+
+
+async def test_review_feed_handles_an_empty_feed(seeded: str) -> None:
+    async with stdio_client(client_for(seeded)) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            text = rendered(await session.get_prompt("review_feed", {}))
+
+    assert "nothing in its feed" in text

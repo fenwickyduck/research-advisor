@@ -201,7 +201,24 @@ claude                   # start a session; ask "what have I been reading?"
 the JSON form for any other client. MCP servers load at startup, so a session
 that was already open will not see it.
 
-Twelve tools. Nine are read-only — your library, your ratings and notes,
+Three prompts and twelve tools. The prompts are the workflows you start
+deliberately — in Claude Code they appear as slash commands:
+
+| | |
+|---|---|
+| `/refresh_profile` | rewrite the profile from everything read and rated since |
+| `/explore <topic>` | work out what a direction is really called, then steer toward it |
+| `/review_feed` | go through the current batch and say which of it is noise |
+
+They are not templates. Each reads the database first and arrives carrying the
+evidence — `/refresh_profile` embeds your library, ratings and notes, so the
+conversation opens with the facts rather than spending three tool calls
+collecting them, and `/explore` searches the corpus before it asks anything, so
+the discussion starts from real titles instead of your guess at the vocabulary.
+Each ends by asking you to confirm before it writes, because you invoked a
+discussion rather than an edit.
+
+Of the tools, nine are read-only — your library, your ratings and notes,
 full-text search, one paper in full, the current feed, a preview of what would
 be recommended, the profile and its evidence. Three write: `write_interest_profile`,
 `follow_author`, `unfollow_author`. Each declares which it is, so a client can
