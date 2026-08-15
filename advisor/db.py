@@ -13,7 +13,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 5
 
 SCHEMA = """
 -- The corpus: everything harvested, most of it never seen by you.
@@ -102,6 +102,45 @@ CREATE TABLE IF NOT EXISTS harvest_state (
   cursor    TEXT,
   last_run  TEXT
 );
+
+-- People whose new work you want regardless of what it is about. Keyed by a
+-- normalised surname+initial, because the same person is written several ways.
+CREATE TABLE IF NOT EXISTS followed_authors (
+  key       TEXT PRIMARY KEY,   -- 'corrigan-gibbs|h'
+  name      TEXT NOT NULL,      -- as you typed it, for display
+  added_at  TEXT NOT NULL
+);
+"""
+
+# Full-text search over the corpus. Contentless (content='papers'): FTS5 stores
+# only the index and reads columns back from papers, so 76k abstracts are not
+# duplicated on disk. That makes the triggers below mandatory rather than a
+# convenience — a contentless table cannot repair itself from the source.
+SEARCH_SCHEMA = """
+CREATE VIRTUAL TABLE IF NOT EXISTS papers_fts USING fts5(
+  title, abstract, authors,
+  content='papers', content_rowid='id',
+  tokenize='unicode61 remove_diacritics 2'
+);
+
+CREATE TRIGGER IF NOT EXISTS papers_fts_insert AFTER INSERT ON papers BEGIN
+  INSERT INTO papers_fts (rowid, title, abstract, authors)
+  VALUES (new.id, new.title, new.abstract, new.authors);
+END;
+
+-- 'delete' rows carry the OLD values: that is how FTS5 unindexes a contentless
+-- row, and passing the new ones instead corrupts the index silently.
+CREATE TRIGGER IF NOT EXISTS papers_fts_delete AFTER DELETE ON papers BEGIN
+  INSERT INTO papers_fts (papers_fts, rowid, title, abstract, authors)
+  VALUES ('delete', old.id, old.title, old.abstract, old.authors);
+END;
+
+CREATE TRIGGER IF NOT EXISTS papers_fts_update AFTER UPDATE ON papers BEGIN
+  INSERT INTO papers_fts (papers_fts, rowid, title, abstract, authors)
+  VALUES ('delete', old.id, old.title, old.abstract, old.authors);
+  INSERT INTO papers_fts (rowid, title, abstract, authors)
+  VALUES (new.id, new.title, new.abstract, new.authors);
+END;
 """
 
 
@@ -131,6 +170,7 @@ def _column_exists(conn: sqlite3.Connection, table: str, column: str) -> bool:
 
 def _init(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    conn.executescript(SEARCH_SCHEMA)
     current = conn.execute("PRAGMA user_version").fetchone()[0]
 
     if current < 2:
@@ -140,8 +180,62 @@ def _init(conn: sqlite3.Connection) -> None:
         if not _column_exists(conn, "papers", "withdrawn_at"):
             conn.execute("ALTER TABLE papers ADD COLUMN withdrawn_at TEXT")
 
+    if current < 3:
+        # v3: full-text search. The triggers only see rows written after they
+        # exist, so an existing corpus has to be backfilled once — rebuild does
+        # that from `papers` in one statement.
+        conn.executescript(SEARCH_SCHEMA)
+        conn.execute("INSERT INTO papers_fts (papers_fts) VALUES ('rebuild')")
+
+    if current < 4:
+        # v4: author keys carry the full given name rather than an initial, so
+        # "Ada Rao" stops matching "Alan Rao". Re-key from the stored name.
+        from advisor.authors import key as _author_key
+
+        for row in conn.execute("SELECT key, name FROM followed_authors").fetchall():
+            fresh = _author_key(row["name"])
+            if fresh and fresh != row["key"]:
+                conn.execute(
+                    "UPDATE OR REPLACE followed_authors SET key = ? WHERE key = ?",
+                    (fresh, row["key"]),
+                )
+
+    if current < 5:
+        # v5: authors and categories were stored with json.dumps' default
+        # ensure_ascii, so "Mårtensson" became the literal text "M\u00e5rtensson".
+        # Decoding on read hid this everywhere except full-text search, which
+        # indexes the raw column and so could not find a tenth of the corpus.
+        _unescape_json_columns(conn)
+
     if current < SCHEMA_VERSION:
         conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+
+
+def _unescape_json_columns(conn: sqlite3.Connection) -> None:
+    """Re-encode JSON columns that carry \\uXXXX escapes, in place."""
+    rows = conn.execute(
+        """SELECT id, authors, categories FROM papers
+            WHERE authors LIKE '%\\u00%' ESCAPE '\\'
+               OR categories LIKE '%\\u00%' ESCAPE '\\'"""
+    ).fetchall()
+
+    for row in rows:
+        updates = {}
+        for column in ("authors", "categories"):
+            value = row[column]
+            if not value or "\\u" not in value:
+                continue
+            try:
+                decoded = json.loads(value)
+            except json.JSONDecodeError:
+                continue
+            updates[column] = json.dumps(decoded, ensure_ascii=False)
+        if updates:
+            assignments = ", ".join(f"{name} = ?" for name in updates)
+            conn.execute(
+                f"UPDATE papers SET {assignments} WHERE id = ?",
+                (*updates.values(), row["id"]),
+            )
 
 
 @contextmanager

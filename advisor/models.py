@@ -196,13 +196,13 @@ def upsert_paper(conn: sqlite3.Connection, paper: Paper) -> int:
             (
                 paper.title,
                 paper.abstract,
-                json.dumps(paper.authors),
+                json.dumps(paper.authors, ensure_ascii=False),
                 paper.published_at,
                 paper.updated_at,
                 paper.arxiv_id,
                 paper.eprint_id,
                 paper.doi,
-                json.dumps(paper.categories),
+                json.dumps(paper.categories, ensure_ascii=False),
                 paper.venue,
                 paper.url,
                 paper.pdf_url,
@@ -227,7 +227,7 @@ def upsert_paper(conn: sqlite3.Connection, paper: Paper) -> int:
             # list wholesale would silently drop the IACR categories.
             combined = list(current) + [c for c in incoming if c not in current]
             if combined != current:
-                changed[name] = json.dumps(combined)
+                changed[name] = json.dumps(combined, ensure_ascii=False)
         elif incoming and (not current or (same_source and incoming != current)):
             changed[name] = incoming
 

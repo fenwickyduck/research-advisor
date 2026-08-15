@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Authors · Research Advisor{% endblock %}
+
+{% block content %}
+<div class="page-head"><h1>People you follow</h1></div>
+
+<p class="status-line">
+  Their new work is pulled into every batch by name, whatever it is about —
+  it does not have to resemble anything you have read.
+</p>
+
+<form method="post" action="/authors/follow" class="searchbar">
+  <input type="text" name="name" placeholder="Wei Chen" aria-label="Author name">
+  <button type="submit" class="primary">Follow</button>
+</form>
+
+{% if following %}
+  <ul class="cards">
+    {% for author in following %}
+      <li class="card follow-row">
+        <span>{{ author.name }}</span>
+        <form method="post" action="/authors/unfollow">
+          <input type="hidden" name="name" value="{{ author.name }}">
+          <button type="submit" class="muted">Unfollow</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="empty"><p>Following nobody yet.</p></div>
+{% endif %}
+
+{% if suggestions %}
+  <h2>From your library</h2>
+  <p class="hint">Authors whose work you have read more than once.</p>
+  <ul class="cards">
+    {% for name, count in suggestions %}
+      <li class="card follow-row">
+        <span>{{ name }} <span class="score">{{ count }} papers</span></span>
+        <form method="post" action="/authors/follow">
+          <input type="hidden" name="name" value="{{ name }}">
+          <button type="submit">Follow</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

@@ -175,6 +175,85 @@ def profile_edit(
     return RedirectResponse("/profile", status_code=303)
 
 
+# ------------------------------------------------------------------------- search
+
+
+@app.get("/search", response_class=HTMLResponse)
+def search_page(
+    request: Request,
+    q: str = "",
+    n: int = 25,
+    conn: sqlite3.Connection = Depends(get_db),
+) -> HTMLResponse:
+    from advisor import search as fts
+
+    query = q.strip()
+    limit = max(1, min(n, 200))
+    return _render(
+        request,
+        "search.html",
+        query=query,
+        hits=fts.search(conn, query, limit=limit) if query else [],
+        total=fts.count(conn, query) if query else 0,
+        corpus_size=conn.execute("SELECT count(*) FROM papers").fetchone()[0],
+    )
+
+
+@app.post("/add/one")
+def add_one(
+    paper_id: int = Form(...),
+    back: str = Form("/search"),
+    conn: sqlite3.Connection = Depends(get_db),
+) -> RedirectResponse:
+    """Mark a paper already in the corpus as read, from a search result."""
+    conn.execute(
+        """INSERT INTO library (paper_id, status, added_at, read_at)
+           VALUES (?, 'read', ?, ?)
+           ON CONFLICT(paper_id) DO UPDATE SET status = 'read'""",
+        (paper_id, now(), now()),
+    )
+    # Only ever bounce back inside this app — `back` arrives from a form field.
+    return RedirectResponse(back if back.startswith("/") else "/search", status_code=303)
+
+
+# ------------------------------------------------------------------------ authors
+
+
+@app.get("/authors", response_class=HTMLResponse)
+def authors_page(
+    request: Request, conn: sqlite3.Connection = Depends(get_db)
+) -> HTMLResponse:
+    from advisor import authors
+
+    return _render(
+        request,
+        "authors.html",
+        following=authors.following(conn),
+        suggestions=authors.suggestions(conn)[:15],
+    )
+
+
+@app.post("/authors/follow")
+def authors_follow(
+    name: str = Form(""), conn: sqlite3.Connection = Depends(get_db)
+) -> RedirectResponse:
+    from advisor import authors
+
+    if name.strip():
+        authors.follow(conn, name)
+    return RedirectResponse("/authors", status_code=303)
+
+
+@app.post("/authors/unfollow")
+def authors_unfollow(
+    name: str = Form(""), conn: sqlite3.Connection = Depends(get_db)
+) -> RedirectResponse:
+    from advisor import authors
+
+    authors.unfollow(conn, name)
+    return RedirectResponse("/authors", status_code=303)
+
+
 # ------------------------------------------------------------------------ library
 
 

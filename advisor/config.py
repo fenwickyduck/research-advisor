@@ -54,6 +54,9 @@ class Config:
     # n_clusters positives there is no clustering to weight and every interest
     # already gets its own query vector, so this only bites as a library grows.
     profile_weight: float = 3.0
+    # How many followed-author papers may enter one batch, so a prolific group
+    # cannot crowd out everything the similarity search found.
+    n_followed: int = 3
     recency_boost: float = 0.05  # added to cosine score for papers < 18 months old
 
     @property

@@ -290,6 +290,86 @@ def _profile(args: argparse.Namespace) -> int:
     return 0
 
 
+def _search(args: argparse.Namespace) -> int:
+    from advisor import search
+
+    cfg = config.load()
+    conn = db.connect(cfg.db_path)
+
+    query = " ".join(args.query)
+    hits = search.search(conn, query, limit=args.limit)
+    if not hits:
+        total = conn.execute("SELECT count(*) FROM papers").fetchone()[0]
+        conn.close()
+        print(
+            f"No matches for {query!r} in {total} papers."
+            if total
+            else "Nothing to search yet — run 'advisor harvest'.",
+            file=sys.stderr,
+        )
+        return 1
+
+    total = search.count(conn, query)
+    for hit in hits:
+        year = (hit.published_at or "????")[:4]
+        print(f"({year}) {hit.title}")
+        print(f"      {hit.authors}")
+        # snippet() marks the matched terms; the terminal wants them plain.
+        snippet = hit.snippet.replace("<mark>", "").replace("</mark>", "")
+        if snippet.strip():
+            print(f"      {snippet.strip()}")
+        print(f"      {hit.url}")
+
+    if total > len(hits):
+        print(f"\n{total} matches; showing {len(hits)}. Use -n to see more.")
+    conn.close()
+    return 0
+
+
+def _follow(args: argparse.Namespace) -> int:
+    from advisor import authors
+
+    cfg = config.load()
+    conn = db.connect(cfg.db_path)
+
+    if args.suggest:
+        ranked = authors.suggestions(conn)
+        if not ranked:
+            print("No repeated authors in your library yet.")
+        for name, count in ranked[:20]:
+            print(f"{count:3d}  {name}")
+        conn.close()
+        return 0
+
+    if not args.names:
+        rows = authors.following(conn)
+        if not rows:
+            print("Following nobody. Try 'advisor follow --suggest'.")
+        for row in rows:
+            print(f"  {row['name']}")
+        conn.close()
+        return 0
+
+    for name in args.names:
+        if authors.follow(conn, name):
+            print(f"  + {name}")
+        else:
+            print(f"  . {name} (already followed, or not a usable name)")
+    conn.close()
+    return 0
+
+
+def _unfollow(args: argparse.Namespace) -> int:
+    from advisor import authors
+
+    cfg = config.load()
+    conn = db.connect(cfg.db_path)
+    for name in args.names:
+        print(f"  - {name}" if authors.unfollow(conn, name) else f"  . {name} (not followed)")
+    conn.close()
+    return 0
+
+
 def _update(args: argparse.Namespace) -> int:
     """The scheduled job: harvest, embed within a budget, refresh the feed.
 
@@ -505,6 +585,22 @@ def main(argv: list[str] | None = None) -> int:
         help="show without recording, so the papers can come up again",
     )
     recommend.set_defaults(func=_recommend)
+
+    search_cmd = sub.add_parser("search", help="full-text search over the corpus")
+    search_cmd.add_argument("query", nargs="+")
+    search_cmd.add_argument("-n", "--limit", type=int, default=10)
+    search_cmd.set_defaults(func=_search)
+
+    follow = sub.add_parser("follow", help="follow an author, or list who you follow")
+    follow.add_argument("names", nargs="*", help="omit to list; quote full names")
+    follow.add_argument(
+        "--suggest", action="store_true", help="authors you have read more than once"
+    )
+    follow.set_defaults(func=_follow)
+
+    unfollow = sub.add_parser("unfollow", help="stop following an author")
+    unfollow.add_argument("names", nargs="+")
+    unfollow.set_defaults(func=_unfollow)
 
     update = sub.add_parser(
         "update", help="harvest, embed and refresh the feed — the scheduled job"

@@ -298,3 +298,9 @@ button.muted { color: var(--muted); }
    "more:"/"less:" prefix in the markup. */
 .steer .more { border-color: var(--accent); }
 .steer .less { opacity: 0.75; text-decoration: line-through; }
+
+.searchbar { display: flex; gap: 0.5rem; margin: 0.75rem 0; }
+.searchbar input { flex: 1; }
+.snippet { color: var(--muted); font-size: 0.9rem; margin: 0.35rem 0 0; }
+.snippet mark { background: transparent; color: var(--text); font-weight: 600; }
+.follow-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }

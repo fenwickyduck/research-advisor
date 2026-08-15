@@ -1,6 +1,6 @@
 """Candidate retrieval: from what you have read to what you should read next.
 
-Three steps, all local and all cheap:
+Four steps, all local and all cheap:
 
 1. **Preference vectors.** Rocchio-style — pull toward what you liked, push away
    from what you did not. Rather than one average, k-means over your liked
@@ -8,8 +8,10 @@ Three steps, all local and all cheap:
    someone working on both lattices and MPC lands between the two and retrieves
    neither well.
 2. **Cosine search** against every embedded paper, with a mild recency prior.
-3. **MMR** to drop near-duplicates, so the shortlist that reaches Claude is not
-   eight variations on one result.
+3. **MMR** to drop near-duplicates, so a batch is not eight variations on one
+   result.
+4. **Followed authors**, retrieved by name and merged in ahead of the rest —
+   the one part of a batch that does not go through the vector space at all.
 """
 
 from __future__ import annotations
@@ -29,12 +31,19 @@ RECENT_WINDOW_DAYS = 548  # ~18 months
 LIKED_WEIGHT = 3.0
 # Longest source title quoted back in an attribution before it is elided.
 TITLE_CHARS = 90
+# Score given to a followed author's paper. Above the cosine range on purpose:
+# it is not a similarity, and it must not be sorted against one.
+FOLLOWED_SCORE = 1.5
 
 
 @dataclass
 class Candidate:
     paper_id: int
     score: float
+    # Set when the paper was retrieved by author rather than by similarity, so
+    # the feed can say why truthfully instead of quoting a cosine that had no
+    # part in choosing it.
+    via: str | None = None
 
 
 @dataclass
@@ -471,17 +480,41 @@ def explain(
     return out
 
 
+def followed(conn: sqlite3.Connection, cfg: Config, exclude: set[int]) -> list[Candidate]:
+    """New work by people you follow, retrieved by name rather than by vector.
+
+    Deliberately outside the similarity search. A followed author's paper is
+    worth seeing *because of who wrote it*, so requiring it to also look like
+    your existing library would filter out exactly the case this feature
+    exists for — the one that took them somewhere new.
+    """
+    from advisor import authors
+
+    matches = authors.papers_by(conn, exclude=exclude, limit=cfg.n_followed)
+    # Scored above the similarity range so they survive the shortlist cut.
+    return [Candidate(pid, FOLLOWED_SCORE, via=who) for pid, who in matches]
+
+
 def recommend(
     conn: sqlite3.Connection, cfg: Config, limit: int | None = None
 ) -> list[Candidate]:
-    """Full local pipeline: preferences -> search -> diversify."""
+    """Full local pipeline: preferences -> search -> diversify, plus follows."""
     matrix = store.load(cfg.vectors_path)
     if matrix is None:
         return []
 
+    exclude = excluded_ids(conn)
+    by_author = followed(conn, cfg, exclude)
+
     queries = preference_vectors(conn, matrix, cfg)
     if queries.shape[0] == 0:
-        return []
+        # A follow list is a complete reason to recommend on its own — no
+        # library, no profile, no embeddings needed on the query side.
+        return by_author[: limit or cfg.n_candidates]
 
-    candidates = search(conn, matrix, queries, cfg)
-    return diversify(conn, matrix, candidates, limit or cfg.n_candidates)
+    candidates = search(conn, matrix, queries, cfg, exclude=exclude)
+    similar = diversify(conn, matrix, candidates, limit or cfg.n_candidates)
+
+    # Followed authors first, then similarity, with no paper appearing twice.
+    seen = {c.paper_id for c in by_author}
+    return by_author + [c for c in similar if c.paper_id not in seen]

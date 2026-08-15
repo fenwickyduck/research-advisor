@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Search · Research Advisor{% endblock %}
+
+{% block content %}
+<div class="page-head"><h1>Search the corpus</h1></div>
+
+<form method="get" action="/search" class="searchbar">
+  <input type="search" name="q" value="{{ query }}" autofocus
+         placeholder="doubly-efficient PIR" aria-label="Search {{ corpus_size }} papers">
+  <button type="submit" class="primary">Search</button>
+</form>
+
+<p class="status-line">
+  {% if query %}
+    <strong>{{ total }}</strong> match{{ "" if total == 1 else "es" }} in
+    {{ corpus_size }} papers
+    {%- if total > hits|length %}, showing {{ hits|length }}{% endif %}
+  {% else %}
+    <strong>{{ corpus_size }}</strong> papers indexed · quote a phrase to keep it
+    together, prefix a word with <code>-</code> to exclude it
+  {% endif %}
+</p>
+
+{% if query and not hits %}
+  <div class="empty"><p>Nothing matched “{{ query }}”.</p></div>
+{% endif %}
+
+{% if hits %}
+  <ul class="cards">
+    {% for hit in hits %}
+      <li class="card">
+        <h3 class="paper-title">
+          {% if hit.url %}<a href="{{ hit.url }}">{{ hit.title }}</a>
+          {% else %}{{ hit.title }}{% endif %}
+        </h3>
+        <p class="paper-meta">
+          {{ hit.authors }}{% if hit.published_at %} · {{ hit.published_at[:4] }}{% endif %}
+        </p>
+        {# snippet() emits <mark> around the matched terms; it is built from
+           indexed column text, and every other field on this page is escaped. #}
+        {% if hit.snippet %}<p class="snippet">{{ hit.snippet|safe }}</p>{% endif %}
+        <div class="actions">
+          <form method="post" action="/add/one">
+            <input type="hidden" name="paper_id" value="{{ hit.paper_id }}">
+            <input type="hidden" name="back" value="/search?q={{ query|urlencode }}">
+            <button type="submit">I have read this</button>
+          </form>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if total > hits|length %}
+    <p><a href="/search?q={{ query|urlencode }}&amp;n={{ hits|length + 25 }}">Show more</a></p>
+  {% endif %}
+{% endif %}
+{% endblock %}

@@ -22,6 +22,8 @@ advisor add 2401.12345 2024/123 10.1007/3-540-48910-X_16   # papers you've read
 advisor harvest                                            # pull the corpus to recommend from
 advisor embed                                              # encode it (resumable)
 advisor recommend                                          # what to read next
+advisor search "doubly-efficient PIR"                      # look through the corpus
+advisor follow "Wei Chen"                              # and see their new work
 advisor profile                                            # what the advisor thinks you work on
 advisor serve                                              # http://127.0.0.1:8000
 advisor status                                             # what's in the database
@@ -75,6 +77,46 @@ advisor schedule --at 23:30
 keeps the harvested corpus and its vectors — the half that costs hours to rebuild.
 `advisor reset --all` empties everything. Both confirm before deleting; `--yes` skips
 the prompt for scripts.
+
+### Following people
+
+Embeddings answer "what is like what I have read". They cannot answer "what has
+this group published since" — and a followed author's next paper may not resemble
+anything in your library yet, which is often exactly why you want it.
+
+So follows are retrieved **by name, outside the vector search**, and lead each batch:
+
+```
+[  --  ] Topology-Hiding Computation From Key Agreement in Diameter-Two...
+         By Wei Chen, whom you follow.
+[0.915] Cryptanalysis of a (Somewhat) Additively Homomorphic Encryption...
+         Closest to "Algebraic Homomorphic Encryption...", which you read (cosine 0.91).
+```
+
+They carry no similarity score, because similarity had no part in choosing them.
+`advisor follow --suggest` (and the panel at `/authors`) lists authors you have read
+more than once — the evidence that you might want the third paper.
+
+Names are matched on surname plus given name, accents folded, so "Henry
+Corrigan-Gibbs" and "H. Corrigan-Gibbs" are one person. Initials are only treated as
+initials when one side actually abbreviates: **"Ada Rao" matches "A. Rao" but not
+"Alan Rao".** Reducing both to `lee|k` — the obvious first implementation — turned
+one followed author into four on a corpus this size. A bare surname you type is a
+deliberate wildcard; a bare surname in the *metadata* is a truncated record and is
+not treated as one.
+
+### Searching the corpus
+
+`advisor search` and `/search` run SQLite FTS5 over title, abstract and authors —
+76,000 papers, ranked BM25 with the title weighted up, in about 150 ms. Quote a
+phrase to keep it together and prefix a word with `-` to exclude it (FTS5 has no
+`-term` syntax of its own; it is translated to `NOT`). The query is rewritten before
+it reaches FTS5, so ordinary punctuation is inert rather than syntax, and a
+malformed query returns nothing instead of raising.
+
+The index is contentless — it stores no second copy of 76,000 abstracts — which
+means it cannot repair itself from the source, so triggers keep it in step with
+every insert, update and delete.
 
 ### Feedback
 

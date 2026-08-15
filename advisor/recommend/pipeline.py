@@ -24,6 +24,13 @@ def latest_profile_id(conn: sqlite3.Connection) -> int | None:
     return row["id"] if row else None
 
 
+def _rationale(candidate: retrieve.Candidate, source) -> str | None:
+    """Why this paper is here, in the terms that actually chose it."""
+    if candidate.via:
+        return f"By {candidate.via}, whom you follow."
+    return source.sentence() if source else None
+
+
 def create_run(
     conn: sqlite3.Connection,
     candidates: list[retrieve.Candidate],
@@ -54,8 +61,10 @@ def create_run(
                     run_id,
                     c.paper_id,
                     rank,
-                    c.score,
-                    source.sentence() if (source := attributions.get(c.paper_id)) else None,
+                    # A followed-author pick has no similarity score, and
+                    # showing one implies it was chosen by similarity.
+                    None if c.via else c.score,
+                    _rationale(c, attributions.get(c.paper_id)),
                 )
                 for rank, c in enumerate(candidates, 1)
             ],
