@@ -54,8 +54,18 @@ def load_model(
     if _model is not None and _model_name == key:
         return _model
 
-    import torch
-    from sentence_transformers import SentenceTransformer
+    try:
+        import torch
+        from sentence_transformers import SentenceTransformer
+    except ImportError as exc:  # pragma: no cover - depends on the optional extra
+        # The likeliest first-run failure: base install, corpus harvested, and
+        # then a traceback from inside a library the user never asked for.
+        raise RuntimeError(
+            "The encoder is not installed, so papers cannot be embedded. Run:\n"
+            "  pip install -e '.[embed]'\n"
+            "Harvesting, searching and the web app work without it; "
+            "recommendations do not."
+        ) from exc
 
     torch.set_num_threads(threads or os.cpu_count() or 1)
 

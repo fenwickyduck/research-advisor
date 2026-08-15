@@ -10,10 +10,38 @@ It runs entirely on your machine: no API key, no account, no per-run cost.
 
 ## Setup
 
+Needs Python 3.11+ and about 2 GB of disk. Nothing else — no account, no API
+key, no service to sign up for.
+
 ```sh
+git clone <your-repo-url> research-advisor && cd research-advisor
 python3 -m venv .venv
-.venv/bin/pip install -e .
+.venv/bin/pip install -e '.[all]'
 ```
+
+`[all]` pulls the encoder (which brings torch, so it is the slow part of the
+install) and the MCP server. `pip install -e .` alone gives you a working web
+app, harvesting and search, but cannot embed and so cannot recommend.
+
+### First run
+
+Four steps, in order. The first two are quick; the third is the one that takes
+real time.
+
+```sh
+advisor add 2401.12345 2024/123        # papers you have read — ten is plenty
+advisor harvest                        # ~78,000 papers, tens of minutes
+advisor embed                          # encodes them; ~3 hours on a laptop CPU
+advisor serve                          # http://127.0.0.1:8000
+```
+
+**You do not have to wait for `advisor embed` to finish.** It encodes your own
+library first, then spreads across years, so recommendations start working
+within a couple of minutes and simply get deeper. Stop it and rerun it whenever
+— it resumes. `advisor status` shows how far it has got.
+
+If you want it to keep itself current after that, `advisor schedule` prints a
+systemd timer and a crontab line for `advisor update`.
 
 ## Use
 

@@ -9,14 +9,17 @@ dependencies = [
     "jinja2>=3.1",
     "httpx>=0.27",
     "python-multipart>=0.0.9",
+    # Retrieval maths. Small, and imported at module scope by the recommender —
+    # without them the web app cannot even start, so they are not optional.
+    "numpy>=1.26",
+    "scikit-learn>=1.5",
 ]
 
 [project.optional-dependencies]
-# Phase 3+. Heavy (torch); installed separately so the web app stays quick to set up.
+# The encoder. Heavy (pulls torch), and separable because harvesting can start
+# while it downloads — but you need it before anything can be recommended.
 embed = [
     "sentence-transformers>=3.0",
-    "numpy>=1.26",
-    "scikit-learn>=1.5",
     # Int8 ONNX inference — ~4.5x faster than torch fp32 on CPU.
     "onnxruntime>=1.17",
     "optimum[onnxruntime]>=1.20",
@@ -28,6 +31,11 @@ mcp = [
 ]
 dev = [
     "pytest>=8.0",
+    "anyio>=4.0",
+]
+# Everything, for a machine you actually intend to use this on.
+all = [
+    "research-advisor[embed,mcp]",
 ]
 
 [project.scripts]
