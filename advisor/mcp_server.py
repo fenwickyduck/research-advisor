@@ -336,7 +336,7 @@ def followed_authors() -> dict[str, Any]:
 
 @server.tool(
     description="Follow an author, so their new papers appear regardless of "
-    "topic. Give the fullest name you have — 'Ada Rao', not 'Lee'.",
+    "topic. Give the fullest name you have — 'Wei Chen', not 'Chen'.",
     annotations=WRITES,
 )
 def follow_author(name: str) -> dict[str, Any]:

@@ -14,8 +14,8 @@ Matching is on surname plus given name, lowercased and stripped of accents and
 punctuation, because the same person appears as "Henry Corrigan-Gibbs" on arXiv
 and "H. Corrigan-Gibbs" on ePrint and a literal match would miss half their
 work. Initials are compared as initials only when one side actually abbreviates:
-"Ada Rao" matches "A. Rao" but not "Alan Rao", who is a different person.
-Collapsing both to ``lee|k`` — the obvious first implementation — turned one
+"Wei Chen" matches "W. Chen" but not "Wen Chen", who is a different person.
+Collapsing both to ``chen|w`` — the obvious first implementation — turned one
 followed author into four on a corpus this size.
 
 What remains is that a bare surname matches everyone who has it, and two people

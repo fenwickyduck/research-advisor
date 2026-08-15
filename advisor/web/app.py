@@ -14,7 +14,8 @@ from collections.abc import Iterator
 from pathlib import Path
 
 from fastapi import Depends, FastAPI, Form, Request
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import UploadFile
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -214,6 +215,62 @@ def add_one(
     )
     # Only ever bounce back inside this app — `back` arrives from a form field.
     return RedirectResponse(back if back.startswith("/") else "/search", status_code=303)
+
+
+# --------------------------------------------------------------------- your data
+
+
+@app.get("/data", response_class=HTMLResponse)
+def data_page(
+    request: Request, imported: str = "", conn: sqlite3.Connection = Depends(get_db)
+) -> HTMLResponse:
+    def count(table: str) -> int:
+        return conn.execute(f"SELECT count(*) FROM {table}").fetchone()[0]
+
+    return _render(
+        request,
+        "data.html",
+        counts={
+            "library entries": count("library"),
+            "ratings": count("feedback"),
+            "profile versions": count("profile_versions"),
+            "followed authors": count("followed_authors"),
+        },
+        corpus_size=count("papers"),
+        imported=imported,
+    )
+
+
+@app.get("/data/export")
+def data_export(conn: sqlite3.Connection = Depends(get_db)) -> Response:
+    """Download everything personal as one file."""
+    from advisor import portable
+
+    stamp = now()[:10]
+    return Response(
+        content=portable.dumps(conn),
+        media_type="application/json",
+        headers={
+            "Content-Disposition": f'attachment; filename="advisor-{stamp}.json"'
+        },
+    )
+
+
+@app.post("/data/import")
+async def data_import(
+    file: UploadFile,
+    replace: str = Form(""),
+    conn: sqlite3.Connection = Depends(get_db),
+) -> RedirectResponse:
+    from advisor import portable
+
+    raw = await file.read()
+    try:
+        report = portable.loads(conn, raw.decode("utf-8"), replace=bool(replace))
+    except (ValueError, UnicodeDecodeError) as exc:
+        return RedirectResponse(f"/data?imported=error: {exc}", status_code=303)
+
+    return RedirectResponse(f"/data?imported={report}", status_code=303)
 
 
 # ------------------------------------------------------------------------ authors

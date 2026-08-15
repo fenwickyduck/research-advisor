@@ -189,7 +189,7 @@ def _init(conn: sqlite3.Connection) -> None:
 
     if current < 4:
         # v4: author keys carry the full given name rather than an initial, so
-        # "Ada Rao" stops matching "Alan Rao". Re-key from the stored name.
+        # "Wei Chen" stops matching "Wen Chen". Re-key from the stored name.
         from advisor.authors import key as _author_key
 
         for row in conn.execute("SELECT key, name FROM followed_authors").fetchall():

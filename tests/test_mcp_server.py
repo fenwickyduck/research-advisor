@@ -107,7 +107,7 @@ async def test_it_reads_the_library_and_the_corpus(seeded: str) -> None:
 
             library = payload(await session.call_tool("library", {}))
             assert library["count"] == 1
-            assert library["papers"][0]["title"].startswith("Barely")
+            assert library["papers"][0]["title"].startswith("Doubly-Efficient")
 
             found = payload(
                 await session.call_tool("search_corpus", {"query": "SNARKs"})

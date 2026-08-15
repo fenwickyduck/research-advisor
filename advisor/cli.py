@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import sys
+from pathlib import Path
 
 from advisor import config, db
 from advisor.models import now, upsert_paper
@@ -414,6 +416,68 @@ def _mcp(args: argparse.Namespace) -> int:
     return 0
 
 
+def _export(args: argparse.Namespace) -> int:
+    from advisor import portable
+
+    cfg = config.load()
+    conn = db.connect(cfg.db_path)
+    try:
+        text = portable.dumps(conn)
+    finally:
+        conn.close()
+
+    if args.output in ("-", None):
+        sys.stdout.write(text)
+        return 0
+
+    path = Path(args.output).expanduser()
+    path.write_text(text, encoding="utf-8")
+    data = json.loads(text)
+    print(
+        f"Wrote {path} — {len(data['library'])} library entries, "
+        f"{len(data['feedback'])} ratings, "
+        f"{len(data['profile_versions'])} profile versions, "
+        f"{len(data['followed_authors'])} followed authors."
+    )
+    print("The corpus and its vectors are not included; they are rebuildable.")
+    return 0
+
+
+def _import(args: argparse.Namespace) -> int:
+    from advisor import portable
+
+    cfg = config.load()
+    config.ensure_dirs(cfg)
+
+    text = sys.stdin.read() if args.path == "-" else Path(args.path).expanduser().read_text()
+
+    conn = db.connect(cfg.db_path)
+    try:
+        if args.replace and not args.yes:
+            existing = conn.execute("SELECT count(*) FROM library").fetchone()[0]
+            if existing:
+                print(f"--replace will delete your current {existing} library entries,")
+                print("along with your ratings, profile history and follows.")
+                try:
+                    if input("Type 'yes' to continue: ").strip().lower() != "yes":
+                        print("Cancelled.")
+                        return 1
+                except EOFError:
+                    print("Cancelled (no terminal to confirm on; pass --yes).",
+                          file=sys.stderr)
+                    return 1
+
+        report = portable.loads(conn, text, replace=args.replace)
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    finally:
+        conn.close()
+
+    print(report)
+    return 0
+
+
 def _update(args: argparse.Namespace) -> int:
     """The scheduled job: harvest, embed within a budget, refresh the feed.
 
@@ -651,6 +715,22 @@ def main(argv: list[str] | None = None) -> int:
         "--config", action="store_true", help="print the client config and exit"
     )
     mcp.set_defaults(func=_mcp)
+
+    export = sub.add_parser(
+        "export", help="write your library, ratings, profile and follows to a file"
+    )
+    export.add_argument("output", nargs="?", default="-", help="path, or - for stdout")
+    export.set_defaults(func=_export)
+
+    import_cmd = sub.add_parser(
+        "import", help="load an export into this install (merges by default)"
+    )
+    import_cmd.add_argument("path", help="file to read, or - for stdin")
+    import_cmd.add_argument(
+        "--replace", action="store_true", help="discard local data first"
+    )
+    import_cmd.add_argument("--yes", action="store_true", help="skip the confirmation")
+    import_cmd.set_defaults(func=_import)
 
     update = sub.add_parser(
         "update", help="harvest, embed and refresh the feed — the scheduled job"

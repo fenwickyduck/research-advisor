@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Your data · Research Advisor{% endblock %}
+
+{% block content %}
+<div class="page-head"><h1>Your data</h1></div>
+
+<p class="status-line">
+  Everything below lives only on this machine. It is never uploaded, and it is
+  not part of the repository this program was installed from.
+</p>
+
+{% if imported %}
+  <div class="{{ 'warn' if imported.startswith('error') else 'card' }}">
+    <p style="margin:0">{{ imported }}</p>
+  </div>
+{% endif %}
+
+<h2>Export</h2>
+<p class="hint">
+  Take it to another machine, or keep it as a backup. The harvested corpus and
+  its vectors are left out — they are large, public and rebuildable, and every
+  install can harvest its own.
+</p>
+<ul class="cards">
+  <li class="card">
+    <ul class="steer">
+      {% for label, n in counts.items() %}
+        <li class="more">{{ n }} {{ label }}</li>
+      {% endfor %}
+    </ul>
+    <div class="actions">
+      <a href="/data/export"><button type="button" class="primary">Download</button></a>
+      <span class="score">{{ corpus_size }} corpus papers not included</span>
+    </div>
+  </li>
+</ul>
+
+<h2>Import</h2>
+<p class="hint">
+  Load an export from another install. Papers it refers to that are missing here
+  are recreated, so this works even before you have harvested anything.
+</p>
+<ul class="cards">
+  <li class="card">
+    <form method="post" action="/data/import" enctype="multipart/form-data">
+      <input type="file" name="file" accept="application/json,.json" required>
+      <p class="hint" style="margin:0.75rem 0 0.5rem">
+        <label>
+          <input type="checkbox" name="replace" value="1">
+          Replace what is here, rather than merging into it
+        </label>
+        — merging is the safe default; replacing deletes your current library,
+        ratings, profile history and follows first.
+      </p>
+      <div class="actions"><button type="submit" class="primary">Load</button></div>
+    </form>
+  </li>
+</ul>
+{% endblock %}

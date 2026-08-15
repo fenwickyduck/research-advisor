@@ -52,7 +52,7 @@ advisor harvest                                            # pull the corpus to 
 advisor embed                                              # encode it (resumable)
 advisor recommend                                          # what to read next
 advisor search "doubly-efficient PIR"                      # look through the corpus
-advisor follow "Wei Chen"                              # and see their new work
+advisor follow "Shafi Goldwasser"                          # and see their new work
 advisor profile                                            # what the advisor thinks you work on
 advisor serve                                              # http://127.0.0.1:8000
 advisor mcp --config                                       # let an assistant consult it
@@ -101,6 +101,33 @@ advisor schedule            # systemd units + crontab line, defaults to 06:00
 advisor schedule --at 23:30
 ```
 
+### Taking your data with you
+
+The program is shareable; your reading is not. **Nothing personal is in this
+repository** — your library, ratings, notes, profile and follows live in
+`~/.local/share/advisor/`, which is gitignored, and every worked example in
+this README is invented.
+
+To move between machines, or to hand a colleague the program without handing
+them your history:
+
+```sh
+advisor export mine.json      # library, ratings, notes, profile, follows
+advisor import mine.json      # on the other machine — merges by default
+```
+
+The same pair is at `/data` in the browser, as a download and an upload.
+
+The export deliberately leaves out the corpus and the vectors: they are large,
+public and rebuildable, and every install harvests its own. What it does carry
+is each remembered paper's real identifiers *and* enough metadata to recreate
+it — so an import works against an empty database, before anything has been
+harvested, rather than silently dropping the half it cannot resolve. Paper ids
+are local autoincrement numbers and are never trusted across installs.
+
+Importing twice changes nothing. `--replace` discards local data first and asks
+before it does.
+
 ### Starting over
 
 `advisor reset` clears your library, ratings, profile and recommendation history, and
@@ -118,9 +145,9 @@ So follows are retrieved **by name, outside the vector search**, and lead each b
 
 ```
 [  --  ] Topology-Hiding Computation From Key Agreement in Diameter-Two...
-         By Wei Chen, whom you follow.
+         By Shafi Goldwasser, whom you follow.
 [0.915] Cryptanalysis of a (Somewhat) Additively Homomorphic Encryption...
-         Closest to "Algebraic Homomorphic Encryption...", which you read (cosine 0.91).
+         Closest to "Fully Homomorphic Encryption over the Integers", which you read (cosine 0.91).
 ```
 
 They carry no similarity score, because similarity had no part in choosing them.
@@ -129,8 +156,8 @@ more than once — the evidence that you might want the third paper.
 
 Names are matched on surname plus given name, accents folded, so "Henry
 Corrigan-Gibbs" and "H. Corrigan-Gibbs" are one person. Initials are only treated as
-initials when one side actually abbreviates: **"Ada Rao" matches "A. Rao" but not
-"Alan Rao".** Reducing both to `lee|k` — the obvious first implementation — turned
+initials when one side actually abbreviates: **"Wei Chen" matches "W. Chen" but not
+"Wen Chen".** Reducing both to `chen|w` — the obvious first implementation — turned
 one followed author into four on a corpus this size. A bare surname you type is a
 deliberate wildcard; a bare surname in the *metadata* is a truncated record and is
 not treated as one.

@@ -31,7 +31,7 @@ def add(conn: sqlite3.Connection, title: str, names: list[str], year: str = "202
         # Accents differ between sources for the same author.
         ("Erik Mårtensson", "Erik Martensson", True),
         # Different people who share a surname and an initial. The first
-        # implementation keyed on 'lee|k' and conflated all of these.
+        # implementation keyed on 'rao|a' and conflated all of these.
         ("Ada Rao", "Alan Rao", False),
         ("Ada Rao", "Amara Rao", False),
         ("Ada Rao", "A. Rao", True),
