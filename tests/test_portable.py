@@ -219,3 +219,79 @@ def test_a_refused_import_leaves_nothing_behind(
         portable.load(target, data)
 
     assert target.execute("SELECT count(*) FROM library").fetchone()[0] == 0
+
+
+def test_papers_already_shown_are_not_offered_again_after_a_move(
+    conn: sqlite3.Connection, target: sqlite3.Connection
+) -> None:
+    """Retrieval excludes what it has shown; a move must not reset that.
+
+    Otherwise the first batch on the new machine is everything you already
+    looked at and passed over.
+    """
+    from advisor.recommend import retrieve
+
+    seed(conn)
+    shown = upsert_paper(
+        conn, Paper(title="Already Shown", authors=["X"], arxiv_id="shown.1")
+    )
+    run = conn.execute(
+        "INSERT INTO runs (created_at, n_candidates) VALUES (?,1)", (now(),)
+    ).lastrowid
+    conn.execute(
+        "INSERT INTO recommendations (run_id, paper_id, rank) VALUES (?,?,1)",
+        (run, shown),
+    )
+    conn.commit()
+
+    report = portable.load(target, portable.export(conn))
+
+    assert report.seen == 1
+    local = target.execute(
+        "SELECT id FROM papers WHERE arxiv_id = 'shown.1'"
+    ).fetchone()["id"]
+    assert local in retrieve.excluded_ids(target)
+
+
+def test_imported_history_does_not_become_the_feed(
+    conn: sqlite3.Connection, target: sqlite3.Connection
+) -> None:
+    """The trap: latest() reads the newest run, so unacted rows would show."""
+    from advisor.recommend import pipeline
+
+    seed(conn)
+    shown = upsert_paper(conn, Paper(title="Old News", authors=["X"], arxiv_id="old.1"))
+    run = conn.execute(
+        "INSERT INTO runs (created_at, n_candidates) VALUES (?,1)", (now(),)
+    ).lastrowid
+    conn.execute(
+        "INSERT INTO recommendations (run_id, paper_id, rank) VALUES (?,?,1)",
+        (run, shown),
+    )
+    conn.commit()
+
+    portable.load(target, portable.export(conn))
+
+    assert pipeline.latest(target) == []
+
+
+def test_seen_papers_are_not_re_recorded_on_a_second_import(
+    conn: sqlite3.Connection, target: sqlite3.Connection
+) -> None:
+    seed(conn)
+    shown = upsert_paper(conn, Paper(title="Shown", authors=["X"], arxiv_id="s.9"))
+    run = conn.execute(
+        "INSERT INTO runs (created_at, n_candidates) VALUES (?,1)", (now(),)
+    ).lastrowid
+    conn.execute(
+        "INSERT INTO recommendations (run_id, paper_id, rank) VALUES (?,?,1)",
+        (run, shown),
+    )
+    conn.commit()
+    data = portable.export(conn)
+
+    portable.load(target, data)
+    second = portable.load(target, data)
+
+    assert second.seen == 0
+    assert target.execute("SELECT count(*) FROM recommendations").fetchone()[0] == 1

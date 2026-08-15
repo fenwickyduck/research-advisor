@@ -347,3 +347,47 @@ def test_the_feed_page_explains_an_unembedded_library(tmp_path, monkeypatch) -> 
 
     assert "not been encoded" in html
     assert "Everything is in place" not in html
+
+
+def test_reset_covers_every_table(conn: sqlite3.Connection) -> None:
+    """The drift that actually happened: a table added after reset was written.
+
+    followed_authors shipped without being added to PERSONAL_TABLES, so
+    'advisor reset' reported clearing your data and quietly left your follow
+    list behind — and 'import --replace' merged follows instead of replacing
+    them. Anything new must land in one list or the other.
+    """
+    tables = {
+        row[0]
+        for row in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        # FTS5 shadow tables are managed by the virtual table, not by us.
+        if not row[0].startswith("papers_fts")
+    }
+
+    assert tables == set(reset.PERSONAL_TABLES) | set(reset.CORPUS_TABLES)
+
+
+def test_clearing_personal_data_forgets_who_you_follow(
+    conn: sqlite3.Connection, cfg: Config
+) -> None:
+    from advisor import authors
+
+    seed_everything(conn, cfg)
+    authors.follow(conn, "Wei Chen")
+
+    reset.clear_personal(conn, cfg)
+
+    assert authors.following(conn) == []
+
+
+def test_clearing_personal_data_removes_the_encoded_profile(
+    conn: sqlite3.Connection, cfg: Config
+) -> None:
+    """The steering cache holds vectors of your own words; it is personal too."""
+    cache = cfg.data_dir / "profile_steer.npz"
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    cache.write_bytes(b"pretend vectors")
+
+    reset.clear_personal(conn, cfg)
+
+    assert not cache.exists()

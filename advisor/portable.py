@@ -37,6 +37,7 @@ class Report:
     feedback: int = 0
     profiles: int = 0
     authors: int = 0
+    seen: int = 0
     skipped: int = 0
 
     def __str__(self) -> str:
@@ -46,6 +47,8 @@ class Report:
             f"{self.profiles} profile versions",
             f"{self.authors} followed authors",
         ]
+        if self.seen:
+            parts.append(f"{self.seen} papers marked already-seen")
         line = "imported " + ", ".join(parts)
         if self.papers_created:
             line += f"\n{self.papers_created} paper(s) were not in this corpus and were added"
@@ -119,6 +122,15 @@ def export(conn: sqlite3.Connection) -> dict[str, Any]:
         for row in conn.execute("SELECT * FROM followed_authors ORDER BY added_at")
     ]
 
+    # Papers already put in front of you. The run history itself is not worth
+    # carrying, but *which papers were shown* is: retrieval excludes them, and
+    # without this a move to a new machine re-offers everything you already
+    # looked at and passed over — the one thing that makes a feed feel broken.
+    seen = []
+    for row in conn.execute("SELECT DISTINCT paper_id FROM recommendations"):
+        remember(row["paper_id"])
+        seen.append(row["paper_id"])
+
     return {
         "format": FORMAT,
         "version": VERSION,
@@ -130,6 +142,7 @@ def export(conn: sqlite3.Connection) -> dict[str, Any]:
         "feedback": feedback,
         "profile_versions": profiles,
         "followed_authors": authors,
+        "seen": seen,
     }
 
 
@@ -260,6 +273,33 @@ def load(conn: sqlite3.Connection, data: dict[str, Any], replace: bool = False) 
                 (entry["content"], entry.get("written_by") or "user", entry["created_at"]),
             )
             report.profiles += 1
+
+        already_seen = {
+            row["paper_id"] for row in conn.execute("SELECT paper_id FROM recommendations")
+        }
+        fresh = [
+            mapping[str(key)]
+            for key in data.get("seen") or []
+            if str(key) in mapping and mapping[str(key)] not in already_seen
+        ]
+        if fresh:
+            # Recorded as one dismissed batch. Dismissed rather than pending,
+            # because `latest()` reads the newest run — leaving these unacted
+            # would replace the feed with someone else's history.
+            cursor = conn.execute(
+                """INSERT INTO runs (created_at, model, profile_id, n_candidates)
+                   VALUES (?,?,?,?)""",
+                (now(), None, None, len(fresh)),
+            )
+            run_id = int(cursor.lastrowid)
+            stamp = now()
+            conn.executemany(
+                """INSERT INTO recommendations
+                       (run_id, paper_id, rank, action, acted_at)
+                   VALUES (?,?,?,'dismissed',?)""",
+                [(run_id, pid, rank, stamp) for rank, pid in enumerate(fresh, 1)],
+            )
+            report.seen = len(fresh)
 
         for entry in data.get("followed_authors") or []:
             from advisor.authors import key as author_key

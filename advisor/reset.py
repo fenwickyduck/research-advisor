@@ -18,8 +18,16 @@ from advisor import db
 from advisor.config import Config
 
 # Your side of the database: what you have read, what you thought of it, what
-# was recommended, and the profile written from all of it.
-PERSONAL_TABLES = ("recommendations", "runs", "profile_versions", "feedback", "library")
+# was recommended, the profile written from all of it, and who you follow.
+# Every table that is not corpus belongs here — see test_reset_covers_every_table.
+PERSONAL_TABLES = (
+    "recommendations",
+    "runs",
+    "profile_versions",
+    "feedback",
+    "library",
+    "followed_authors",
+)
 
 # The corpus side: harvested papers, where the harvest got to, and the vectors.
 CORPUS_TABLES = ("vector_index", "harvest_state", "papers")
@@ -32,7 +40,7 @@ def counts(conn: sqlite3.Connection, tables: tuple[str, ...]) -> dict[str, int]:
     }
 
 
-def clear_personal(conn: sqlite3.Connection) -> dict[str, int]:
+def clear_personal(conn: sqlite3.Connection, cfg: Config | None = None) -> dict[str, int]:
     """Forget everything about *you*, keeping the corpus and its vectors.
 
     Deleted in dependency order so the foreign keys never see a dangling row.
@@ -41,6 +49,11 @@ def clear_personal(conn: sqlite3.Connection) -> dict[str, int]:
     with db.transaction(conn):
         for table in PERSONAL_TABLES:
             conn.execute(f"DELETE FROM {table}")
+
+    # Encoded copies of your own profile phrases — derived from personal data,
+    # so it goes with it rather than lingering after everything else is gone.
+    if cfg is not None:
+        (cfg.data_dir / "profile_steer.npz").unlink(missing_ok=True)
     return removed
 
 
@@ -61,6 +74,6 @@ def clear_corpus(conn: sqlite3.Connection, cfg: Config) -> dict[str, int]:
 
 def clear_all(conn: sqlite3.Connection, cfg: Config) -> dict[str, int]:
     """Back to an empty database."""
-    removed = clear_personal(conn)
+    removed = clear_personal(conn, cfg)
     removed.update(clear_corpus(conn, cfg))
     return removed

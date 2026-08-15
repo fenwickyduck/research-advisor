@@ -629,7 +629,7 @@ def _reset(args: argparse.Namespace) -> int:
             conn.close()
             return 1
 
-    removed = reset.clear_all(conn, cfg) if args.all else reset.clear_personal(conn)
+    removed = reset.clear_all(conn, cfg) if args.all else reset.clear_personal(conn, cfg)
     conn.close()
 
     print(f"\nCleared {sum(removed.values())} row(s).")
@@ -661,6 +661,9 @@ def _status(args: argparse.Namespace) -> int:
     )
     print(f"library    {count('library')} entries")
     print(f"feedback   {count('feedback')} events")
+    following = count("followed_authors")
+    if following:
+        print(f"following  {following} author(s)")
 
     # Coverage, not just a count: retrieval only ever sees the embedded part,
     # so "22016 vectors" alone does not tell you how much of the corpus is

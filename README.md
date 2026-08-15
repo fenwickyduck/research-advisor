@@ -275,7 +275,9 @@ advisor import mine.json     # merges by default
 The same pair is at `/data` in the browser. Paper ids are local numbers, so an
 export carries each remembered paper's real identifiers *and* enough metadata to
 recreate it — an import works against an empty database, before anything has
-been harvested. Importing twice changes nothing.
+been harvested. It also carries which papers you have already been shown, so a
+move does not re-offer everything you looked at once and passed over.
+Importing twice changes nothing.
 
 The corpus travels separately, with `advisor snapshot`, because it is the
 opposite kind of thing: large, public, identical for everyone, and expensive to
