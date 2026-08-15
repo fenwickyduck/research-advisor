@@ -46,8 +46,20 @@ Needs Python 3.11+ and about 2 GB of disk.
 git clone https://github.com/fenwickyduck/research-advisor.git
 cd research-advisor
 python3 -m venv .venv
-.venv/bin/pip install -e '.[all]'
+source .venv/bin/activate          # every new terminal needs this
+pip install -e '.[all]'
 ```
+
+**Activating the virtualenv is what puts `advisor` on your `PATH`.** Without it
+you get `command not found`, because the command lives in `.venv/bin/` and
+nothing outside that environment knows about it. You need `source
+.venv/bin/activate` once per terminal session.
+
+If you would rather not activate anything, every command below also works
+spelled out in full — `.venv/bin/advisor status` instead of `advisor status`.
+That is the form to use in scripts and cron jobs, which have no shell to
+activate in; `advisor schedule` and `advisor mcp --config` already print
+absolute paths for exactly that reason.
 
 Then either **start from a snapshot** (minutes) —
 
