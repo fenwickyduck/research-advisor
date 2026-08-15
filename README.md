@@ -188,9 +188,18 @@ advisor never calls a model.** It answers questions and holds no credential;
 the client launches it over stdio, so nothing listens on a port and nothing
 leaves the machine except what you ask the assistant.
 
+On Linux the client to use is **Claude Code** — a CLI, unlike Claude Desktop,
+which is macOS and Windows only:
+
 ```sh
-advisor mcp --config     # prints the JSON to paste into the client, then restart it
+claude mcp add research-advisor -- "$PWD/.venv/bin/advisor" mcp
+claude mcp list          # should say ✔ Connected
+claude                   # start a session; ask "what have I been reading?"
 ```
+
+`advisor mcp --config` prints that command with the right absolute path, plus
+the JSON form for any other client. MCP servers load at startup, so a session
+that was already open will not see it.
 
 Twelve tools. Nine are read-only — your library, your ratings and notes,
 full-text search, one paper in full, the current feed, a preview of what would

@@ -389,13 +389,23 @@ def _mcp(args: argparse.Namespace) -> int:
     if args.config:
         from advisor.schedule import executable
 
-        print("Paste this into your MCP client's config, then restart it:\n")
-        print(mcp_server.client_config(str(executable())))
+        command = executable()
         print(
-            "\nClaude Desktop keeps that file at:\n"
-            "  ~/.config/Claude/claude_desktop_config.json        (Linux)\n"
-            "  ~/Library/Application Support/Claude/claude_desktop_config.json  (macOS)\n"
-            "\nMerge the 'research-advisor' entry into any existing 'mcpServers' "
+            "Claude Code (a CLI, works on Linux — this is almost certainly the\n"
+            "one you want) registers the server for you:\n\n"
+            f"  claude mcp add research-advisor -- {command} mcp\n\n"
+            "  Add --scope user to make it available in every directory rather\n"
+            "  than only this project. Then start a new 'claude' session — MCP\n"
+            "  servers are loaded at startup, so an open session will not see it.\n"
+            "  Check it with 'claude mcp list'.\n"
+        )
+        print(
+            "Any other MCP client takes the same server as JSON — Claude Desktop\n"
+            "(macOS and Windows only) keeps it in claude_desktop_config.json:\n"
+        )
+        print(mcp_server.client_config(str(command)))
+        print(
+            "\nMerge the 'research-advisor' entry into any existing 'mcpServers'\n"
             "object rather than replacing the file."
         )
         return 0
