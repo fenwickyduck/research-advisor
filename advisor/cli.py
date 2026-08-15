@@ -159,9 +159,13 @@ def _print_candidates(conn, cfg, candidates) -> None:
             "SELECT title, published_at, url FROM papers WHERE id = ?", (candidate.paper_id,)
         ).fetchone()
         year = (row["published_at"] or "????")[:4]
-        print(f"{rank:3d}. [{candidate.score:.3f}] ({year}) {row['title']}")
-        source = attributions.get(candidate.paper_id)
-        if source:
+        # A followed-author pick has no similarity score and was not chosen by
+        # similarity, so it shows neither — same as the recorded feed.
+        score = "  --  " if candidate.via else f"{candidate.score:.3f}"
+        print(f"{rank:3d}. [{score}] ({year}) {row['title']}")
+        if candidate.via:
+            print(f"      By {candidate.via}, whom you follow.")
+        elif source := attributions.get(candidate.paper_id):
             print(f"      {source.sentence()}")
         print(f"      {row['url']}")
 

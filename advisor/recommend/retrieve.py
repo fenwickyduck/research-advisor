@@ -515,6 +515,10 @@ def recommend(
     candidates = search(conn, matrix, queries, cfg, exclude=exclude)
     similar = diversify(conn, matrix, candidates, limit or cfg.n_candidates)
 
-    # Followed authors first, then similarity, with no paper appearing twice.
+    # Followed authors first, then similarity, with no paper appearing twice —
+    # and the whole thing cut to the limit. Returning follows *on top of* a
+    # full similarity batch would silently hand back more than was asked for.
+    wanted = limit or cfg.n_candidates
     seen = {c.paper_id for c in by_author}
-    return by_author + [c for c in similar if c.paper_id not in seen]
+    merged = by_author + [c for c in similar if c.paper_id not in seen]
+    return merged[:wanted]

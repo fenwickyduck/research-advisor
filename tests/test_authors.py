@@ -135,3 +135,60 @@ def test_someone_you_already_follow_is_not_suggested(conn: sqlite3.Connection) -
     authors.follow(conn, "W. Chen")
 
     assert authors.suggestions(conn) == []
+
+
+# --------------------------------------------------------- follows in a batch
+
+
+def embedded_corpus(conn: sqlite3.Connection, cfg, n: int = 12) -> list[int]:
+    """A small embedded corpus plus one library paper to retrieve against."""
+    import numpy as np
+
+    from advisor.embed import store
+
+    ids = [add(conn, f"Paper {i}", [f"Author {i}"]) for i in range(n)]
+    matrix = store.normalize(
+        np.array([[1.0, 0.02 * i] for i in range(n)], dtype=np.float32)
+    )
+    store.record_rows(conn, ids, store.append(cfg.vectors_path, matrix), cfg.embedding_model)
+    conn.execute(
+        "INSERT INTO library (paper_id, status, added_at) VALUES (?,'read',?)",
+        (ids[0], now()),
+    )
+    return ids
+
+
+def test_a_batch_never_exceeds_the_limit_it_was_asked_for(tmp_path, conn) -> None:
+    """Follows are merged into the batch, not stacked on top of a full one."""
+    from advisor.config import Config
+    from advisor.recommend import retrieve
+
+    cfg = Config(data_dir=tmp_path, n_clusters=2, n_followed=3)
+    ids = embedded_corpus(conn, cfg)
+    # Make three of the corpus papers by someone followed.
+    for paper_id in ids[5:8]:
+        conn.execute(
+            'UPDATE papers SET authors = ? WHERE id = ?', ('["Wei Chen"]', paper_id)
+        )
+    authors.follow(conn, "Wei Chen")
+
+    assert len(retrieve.recommend(conn, cfg, limit=6)) == 6
+    assert len(retrieve.recommend(conn, cfg, limit=2)) == 2
+
+
+def test_followed_picks_lead_the_batch_and_are_labelled(tmp_path, conn) -> None:
+    from advisor.config import Config
+    from advisor.recommend import retrieve
+
+    cfg = Config(data_dir=tmp_path, n_clusters=2, n_followed=2)
+    ids = embedded_corpus(conn, cfg)
+    for paper_id in ids[9:11]:
+        conn.execute(
+            'UPDATE papers SET authors = ? WHERE id = ?', ('["Wei Chen"]', paper_id)
+        )
+    authors.follow(conn, "Wei Chen")
+
+    batch = retrieve.recommend(conn, cfg, limit=6)
+
+    assert [c.via for c in batch[:2]] == ["Wei Chen", "Wei Chen"]
+    assert all(c.via is None for c in batch[2:]), "similarity picks carry no author"
