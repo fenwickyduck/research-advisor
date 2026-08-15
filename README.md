@@ -14,7 +14,8 @@ Needs Python 3.11+ and about 2 GB of disk. Nothing else — no account, no API
 key, no service to sign up for.
 
 ```sh
-git clone <your-repo-url> research-advisor && cd research-advisor
+git clone https://github.com/fenwickyduck/research-advisor.git
+cd research-advisor
 python3 -m venv .venv
 .venv/bin/pip install -e '.[all]'
 ```
