@@ -26,6 +26,7 @@ advisor search "doubly-efficient PIR"                      # look through the co
 advisor follow "Wei Chen"                              # and see their new work
 advisor profile                                            # what the advisor thinks you work on
 advisor serve                                              # http://127.0.0.1:8000
+advisor mcp --config                                       # let an assistant consult it
 advisor status                                             # what's in the database
 
 advisor update                                             # all of the above, for a cron job
@@ -178,6 +179,34 @@ starting point.
 The remaining sections stay prose, for you to read. A profile that is all prose simply
 steers nothing; `/profile` tells you which case you are in.
 
+#### Talking to an assistant about it
+
+`advisor mcp` serves your library, the corpus and your profile over the Model
+Context Protocol, so an assistant you already run — Claude Desktop, say — can
+consult them. **The direction is the opposite of the usual integration: the
+advisor never calls a model.** It answers questions and holds no credential;
+the client launches it over stdio, so nothing listens on a port and nothing
+leaves the machine except what you ask the assistant.
+
+```sh
+advisor mcp --config     # prints the JSON to paste into the client, then restart it
+```
+
+Twelve tools. Nine are read-only — your library, your ratings and notes,
+full-text search, one paper in full, the current feed, a preview of what would
+be recommended, the profile and its evidence. Three write: `write_interest_profile`,
+`follow_author`, `unfollow_author`. Each declares which it is, so a client can
+ask before changing anything, and there is deliberately no tool that deletes a
+paper, clears your library or resets the database.
+
+What it makes possible is the conversation the app itself cannot have: *"what
+have I been reading lately"*, or *"I want to move toward verifiable computation
+— what is that literature actually called, and write me the steering lines for
+it"*. The last one matters because the assistant can search the corpus for the
+real vocabulary first, then write `## More of` lines that work, which is the
+part most people would rather not phrase themselves. Every save is a new
+version you can read and revert at `/profile`.
+
 #### If you would rather not write it yourself
 
 `advisor profile --brief` (and a panel at `/profile`) prints your reading, your ratings
@@ -246,6 +275,7 @@ Phase 3 adds dependencies deliberately kept out of the base install:
 
 ```sh
 .venv/bin/pip install -e '.[embed]'   # sentence-transformers, onnxruntime, numpy, scikit-learn
+.venv/bin/pip install -e '.[mcp]'     # the MCP server, if you want `advisor mcp`
 ```
 
 ### Embedding: you do not wait for it

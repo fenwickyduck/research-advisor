@@ -21,6 +21,11 @@ embed = [
     "onnxruntime>=1.17",
     "optimum[onnxruntime]>=1.20",
 ]
+# Lets an assistant you already run (Claude Desktop, say) query your library.
+# A server, not a client: it answers questions and holds no credential.
+mcp = [
+    "mcp>=2.0",
+]
 dev = [
     "pytest>=8.0",
 ]

@@ -370,6 +370,40 @@ def _unfollow(args: argparse.Namespace) -> int:
     return 0
 
 
+def _mcp(args: argparse.Namespace) -> int:
+    """Serve the library over MCP, so an assistant you run can consult it.
+
+    Nothing is sent anywhere: this speaks stdio to a client that launches it,
+    and answers questions about your own database.
+    """
+    try:
+        from advisor import mcp_server
+    except ImportError:
+        print(
+            "The 'mcp' package is not installed. Run:\n"
+            "  pip install -e '.[mcp]'",
+            file=sys.stderr,
+        )
+        return 1
+
+    if args.config:
+        from advisor.schedule import executable
+
+        print("Paste this into your MCP client's config, then restart it:\n")
+        print(mcp_server.client_config(str(executable())))
+        print(
+            "\nClaude Desktop keeps that file at:\n"
+            "  ~/.config/Claude/claude_desktop_config.json        (Linux)\n"
+            "  ~/Library/Application Support/Claude/claude_desktop_config.json  (macOS)\n"
+            "\nMerge the 'research-advisor' entry into any existing 'mcpServers' "
+            "object rather than replacing the file."
+        )
+        return 0
+
+    mcp_server.main()
+    return 0
+
+
 def _update(args: argparse.Namespace) -> int:
     """The scheduled job: harvest, embed within a budget, refresh the feed.
 
@@ -601,6 +635,12 @@ def main(argv: list[str] | None = None) -> int:
     unfollow = sub.add_parser("unfollow", help="stop following an author")
     unfollow.add_argument("names", nargs="+")
     unfollow.set_defaults(func=_unfollow)
+
+    mcp = sub.add_parser("mcp", help="serve your library to an assistant over MCP")
+    mcp.add_argument(
+        "--config", action="store_true", help="print the client config and exit"
+    )
+    mcp.set_defaults(func=_mcp)
 
     update = sub.add_parser(
         "update", help="harvest, embed and refresh the feed — the scheduled job"
