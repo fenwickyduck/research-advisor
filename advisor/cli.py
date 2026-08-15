@@ -482,6 +482,51 @@ def _import(args: argparse.Namespace) -> int:
     return 0
 
 
+def _snapshot(args: argparse.Namespace) -> int:
+    from advisor import snapshot
+
+    cfg = config.load()
+    config.ensure_dirs(cfg)
+    conn = db.connect(cfg.db_path)
+
+    def say(message: str) -> None:
+        if not args.quiet:
+            print(message, flush=True)
+
+    try:
+        if args.action == "save":
+            meta = snapshot.save(conn, cfg, Path(args.path), say)
+            size = Path(args.path).stat().st_size / 1048576
+            print(
+                f"\nWrote {args.path} — {meta['papers']} papers, "
+                f"{meta['dimensions']}d {meta['dtype']} vectors, {size:.0f} MB."
+            )
+            print("Contains no library, ratings, notes or profile.")
+        elif args.action == "show":
+            meta = snapshot.inspect(Path(args.path))
+            for key, value in meta.items():
+                print(f"  {key:16} {value}")
+        else:
+            meta = snapshot.load(conn, cfg, Path(args.path), say, replace=args.replace)
+            print(
+                f"\nRestored {meta['restored']} papers embedded with "
+                f"{meta['embedding_model']}."
+            )
+            if meta["merged"]:
+                print(
+                    f"{meta['merged']} of the snapshot's {meta['papers']} were "
+                    f"duplicates of each other and merged."
+                )
+            print("Run 'advisor harvest' to pick up anything published since.")
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    finally:
+        conn.close()
+
+    return 0
+
+
 def _update(args: argparse.Namespace) -> int:
     """The scheduled job: harvest, embed within a budget, refresh the feed.
 
@@ -735,6 +780,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     import_cmd.add_argument("--yes", action="store_true", help="skip the confirmation")
     import_cmd.set_defaults(func=_import)
+
+    snapshot_cmd = sub.add_parser(
+        "snapshot", help="share or restore the corpus and its vectors"
+    )
+    snapshot_cmd.add_argument("action", choices=["save", "load", "show"])
+    snapshot_cmd.add_argument("path")
+    snapshot_cmd.add_argument(
+        "--replace", action="store_true", help="on load, discard local vectors first"
+    )
+    snapshot_cmd.add_argument("--quiet", action="store_true")
+    snapshot_cmd.set_defaults(func=_snapshot)
 
     update = sub.add_parser(
         "update", help="harvest, embed and refresh the feed — the scheduled job"

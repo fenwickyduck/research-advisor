@@ -1,17 +1,46 @@
 # Research Advisor
 
-A personal reading advisor for research papers. You tell it what you've read, it recommends
-what to read next, you tell it what you thought, and the recommendations improve.
+A personal reading advisor for research papers. You tell it what you have read,
+it tells you what to read next, you tell it what you thought, and it gets
+better at it.
 
-Corpus: **arXiv** (configurable categories, `cs.CR` by default) and the
-**Cryptology ePrint Archive**. Recommendations are hybrid — local embeddings retrieve
-candidates, and each one is attributed to the paper of yours that pulled it in.
-It runs entirely on your machine: no API key, no account, no per-run cost.
+It runs entirely on your own machine. No account, no API key, no service to
+sign up for, nothing sent anywhere except the public archives it harvests from.
+
+## How it works
+
+Four moving parts, and it is worth understanding them because every command
+below belongs to one of them.
+
+**1. A corpus.** It downloads the metadata — title, abstract, authors — of
+every paper on arXiv `cs.CR` and the Cryptology ePrint Archive: about 76,000 of
+them. This is *harvesting*, and it is incremental, so after the first time it
+only fetches what changed.
+
+**2. Embeddings.** Each paper's title and abstract are run through
+[SPECTER](https://huggingface.co/allenai/specter), a model trained on
+scientific text, which turns them into a 768-number vector. Papers about
+similar things end up with similar vectors. This is *embedding*, it happens
+locally on your CPU, and it is the slow part — about three hours for the whole
+corpus, or seconds if you load a prebuilt snapshot.
+
+**3. Your library.** The papers you say you have read, plus what you thought of
+them. Averaging their vectors gives a picture of your interests — several
+pictures, in fact, since someone reading across two subfields is badly
+described by one average.
+
+**4. Retrieval.** To recommend, it compares your interest vectors against every
+paper in the corpus, drops near-duplicates so a batch is not eight variations
+on one result, excludes anything you have already seen, and adds new work by
+authors you follow. Each recommendation is labelled with the reason it was
+chosen — the paper of yours it is nearest to, or the author you follow.
+
+There is no language model anywhere in that loop, which is why it costs nothing
+to run and why your reading never leaves the machine.
 
 ## Setup
 
-Needs Python 3.11+ and about 2 GB of disk. Nothing else — no account, no API
-key, no service to sign up for.
+Needs Python 3.11+ and about 2 GB of disk.
 
 ```sh
 git clone https://github.com/fenwickyduck/research-advisor.git
@@ -20,160 +49,72 @@ python3 -m venv .venv
 .venv/bin/pip install -e '.[all]'
 ```
 
-`[all]` pulls the encoder (which brings torch, so it is the slow part of the
-install) and the MCP server. `pip install -e .` alone gives you a working web
-app, harvesting and search, but cannot embed and so cannot recommend.
-
-### First run
-
-Four steps, in order. The first two are quick; the third is the one that takes
-real time.
+Then either **start from a snapshot** (minutes) —
 
 ```sh
-advisor add 2401.12345 2024/123        # papers you have read — ten is plenty
-advisor harvest                        # ~78,000 papers, tens of minutes
-advisor embed                          # encodes them; ~3 hours on a laptop CPU
-advisor serve                          # http://127.0.0.1:8000
+# Download corpus.tar from this repository's Releases page, then:
+advisor snapshot load corpus.tar     # ~76,000 papers, already embedded
+advisor harvest                      # anything published since it was made
+advisor add 2401.12345 2024/123      # papers you have read — ten is plenty
+advisor serve                        # http://127.0.0.1:8000
 ```
 
-**You do not have to wait for `advisor embed` to finish.** It encodes your own
-library first, then spreads across years, so recommendations start working
-within a couple of minutes and simply get deeper. Stop it and rerun it whenever
-— it resumes. `advisor status` shows how far it has got.
-
-If you want it to keep itself current after that, `advisor schedule` prints a
-systemd timer and a crontab line for `advisor update`.
-
-## Use
+— or **build it yourself** (an evening), which requires trusting nobody's file:
 
 ```sh
-advisor add 2401.12345 2024/123 10.1007/3-540-48910-X_16   # papers you've read
-advisor harvest                                            # pull the corpus to recommend from
-advisor embed                                              # encode it (resumable)
-advisor recommend                                          # what to read next
-advisor search "doubly-efficient PIR"                      # look through the corpus
-advisor follow "Shafi Goldwasser"                          # and see their new work
-advisor profile                                            # what the advisor thinks you work on
-advisor serve                                              # http://127.0.0.1:8000
-advisor mcp --config                                       # let an assistant consult it
-advisor status                                             # what's in the database
-
-advisor update                                             # all of the above, for a cron job
-advisor schedule                                           # how to run that nightly
-advisor reset                                              # forget what it learned about you
+advisor add 2401.12345 2024/123      # papers you have read
+advisor harvest                      # tens of minutes
+advisor embed                        # ~3 hours on a laptop CPU
+advisor serve
 ```
 
-`add` accepts arXiv IDs, ePrint IDs, DOIs, and any URL containing one — one per line on
-stdin, or as arguments. The same works from the browser at `/add`.
+You do not have to wait for `advisor embed` to finish. It encodes your own
+library first and then spreads across years, so recommendations start working
+within a couple of minutes and simply get better. Stop and rerun it whenever —
+it resumes where it left off.
 
-`recommend` records the batch it shows you, exactly as the browser feed does, so nothing
-is recommended twice. Use `--preview` to look without recording — otherwise the terminal
-would keep repeating one list while the feed moved on.
+## Commands
 
-`harvest` is incremental: it records a cursor per source, so the first run backfills
-(arXiv `cs.CR` alone is ~51,000 papers, plus ~27,000 from ePrint) and every run after
-that fetches only what changed. It is safe to interrupt — progress is saved per page, and
-rerunning resumes.
+Everything is `advisor <command>`; add `--help` to any of them.
 
-### Running unattended
+### Getting papers in
 
-`advisor update` is the whole nightly job — harvest, embed, then build a fresh feed.
-The three belong together: harvesting without embedding leaves the new papers invisible
-to retrieval, and embedding without a run leaves them out of the feed until you next
-press the button.
+| | |
+|---|---|
+| `advisor add <ids…>` | Record papers you have read. Takes arXiv IDs, ePrint IDs, DOIs, or any URL containing one — as arguments, or one per line on stdin. Also at `/add`. |
+| `advisor harvest` | Download new paper metadata from arXiv and ePrint. Incremental: it remembers where it got to, so later runs fetch only what changed. Safe to interrupt. |
+| `advisor embed` | Turn papers into vectors. Resumable, and ordered so partial results are useful. Nothing can be recommended until it is embedded. |
+| `advisor snapshot save\|load\|show <file>` | Share or restore the whole corpus and its vectors as one file, instead of harvesting and embedding it yourself. |
 
-It is written to be safe on a timer rather than merely automatic:
+### Getting papers out
 
-- **The embed pass is bounded** (`--max-minutes`, default 30). The first run after a
-  backfill would otherwise hold the machine for hours; instead it stops at the next
-  batch boundary and the remainder is picked up the following night.
-- **Passes cannot overlap.** `advisor embed` and a scheduled `advisor update` take an
-  advisory lock, because both rewrite the vector matrix wholesale — the loser would
-  silently discard the winner's work. A scheduled run that finds the lock held says so
-  and moves on rather than queueing behind an hours-long manual pass.
+| | |
+|---|---|
+| `advisor recommend` | What to read next. Records the batch, as the web feed does, so nothing is suggested twice. `--preview` looks without recording; `-n` sets how many. |
+| `advisor search <query>` | Full-text search over the corpus. Quote a phrase to keep it together; prefix a word with `-` to exclude it. |
+| `advisor serve` | The web UI at `http://127.0.0.1:8000` — feed, library, search, authors, profile, data. |
+| `advisor status` | What is in the database and how far embedding has got. Start here when something seems wrong. |
 
-`advisor schedule` prints a ready-made systemd timer and a crontab line, pointing at
-this installation's absolute path (both cron and systemd run with a minimal `PATH` that
-will not find a virtualenv). It installs nothing — paste what you want:
+### Teaching it about you
 
-```sh
-advisor schedule            # systemd units + crontab line, defaults to 06:00
-advisor schedule --at 23:30
-```
+| | |
+|---|---|
+| `advisor profile` | Show your interest profile. `--brief` prints your reading and ratings with instructions, to hand to an assistant of your choosing. |
+| `advisor follow <name>` | Follow an author; their new work appears whatever it is about. No arguments lists who you follow; `--suggest` names authors you have read more than once. |
+| `advisor unfollow <name>` | Stop following someone. |
+| `advisor mcp` | Serve your library to an assistant over MCP. `--config` prints the setup command. |
 
-### Taking your data with you
+### Housekeeping
 
-The program is shareable; your reading is not. **Nothing personal is in this
-repository** — your library, ratings, notes, profile and follows live in
-`~/.local/share/advisor/`, which is gitignored, and every worked example in
-this README is invented.
+| | |
+|---|---|
+| `advisor update` | Harvest, embed within a time budget, and build a fresh feed — the whole nightly job in one command. |
+| `advisor schedule` | Print a systemd timer and a crontab line for `advisor update`. Installs nothing. |
+| `advisor export <file>` | Write your library, ratings, notes, profile and follows to a file. |
+| `advisor import <file>` | Load that file into any install. Merges by default; `--replace` overwrites. |
+| `advisor reset` | Forget what it learned about you, keeping the corpus. `--all` empties everything. |
 
-To move between machines, or to hand a colleague the program without handing
-them your history:
-
-```sh
-advisor export mine.json      # library, ratings, notes, profile, follows
-advisor import mine.json      # on the other machine — merges by default
-```
-
-The same pair is at `/data` in the browser, as a download and an upload.
-
-The export deliberately leaves out the corpus and the vectors: they are large,
-public and rebuildable, and every install harvests its own. What it does carry
-is each remembered paper's real identifiers *and* enough metadata to recreate
-it — so an import works against an empty database, before anything has been
-harvested, rather than silently dropping the half it cannot resolve. Paper ids
-are local autoincrement numbers and are never trusted across installs.
-
-Importing twice changes nothing. `--replace` discards local data first and asks
-before it does.
-
-### Starting over
-
-`advisor reset` clears your library, ratings, profile and recommendation history, and
-keeps the harvested corpus and its vectors — the half that costs hours to rebuild.
-`advisor reset --all` empties everything. Both confirm before deleting; `--yes` skips
-the prompt for scripts.
-
-### Following people
-
-Embeddings answer "what is like what I have read". They cannot answer "what has
-this group published since" — and a followed author's next paper may not resemble
-anything in your library yet, which is often exactly why you want it.
-
-So follows are retrieved **by name, outside the vector search**, and lead each batch:
-
-```
-[  --  ] Topology-Hiding Computation From Key Agreement in Diameter-Two...
-         By Shafi Goldwasser, whom you follow.
-[0.915] Cryptanalysis of a (Somewhat) Additively Homomorphic Encryption...
-         Closest to "Fully Homomorphic Encryption over the Integers", which you read (cosine 0.91).
-```
-
-They carry no similarity score, because similarity had no part in choosing them.
-`advisor follow --suggest` (and the panel at `/authors`) lists authors you have read
-more than once — the evidence that you might want the third paper.
-
-Names are matched on surname plus given name, accents folded, so "Henry
-Corrigan-Gibbs" and "H. Corrigan-Gibbs" are one person. Initials are only treated as
-initials when one side actually abbreviates: **"Wei Chen" matches "W. Chen" but not
-"Wen Chen".** Reducing both to `chen|w` — the obvious first implementation — turned
-one followed author into four on a corpus this size. A bare surname you type is a
-deliberate wildcard; a bare surname in the *metadata* is a truncated record and is
-not treated as one.
-
-### Searching the corpus
-
-`advisor search` and `/search` run SQLite FTS5 over title, abstract and authors —
-76,000 papers, ranked BM25 with the title weighted up, in about 150 ms. Quote a
-phrase to keep it together and prefix a word with `-` to exclude it (FTS5 has no
-`-term` syntax of its own; it is translated to `NOT`). The query is rewritten before
-it reaches FTS5, so ordinary punctuation is inert rather than syntax, and a
-malformed query returns nothing instead of raising.
-
-The index is contentless — it stores no second copy of 76,000 abstracts — which
-means it cannot repair itself from the source, so triggers keep it in step with
-every insert, update and delete.
+## The parts worth explaining
 
 ### Feedback
 
@@ -187,24 +128,17 @@ decoration — it changes how far the rejection moves your interests:
 | Too theoretical / applied / not rigorous | half push |
 | Want newer work | leaves interests alone, leans the recency prior (capped at 3x) |
 
-An unlabelled thumbs-down gets the full default push, so explaining yourself stays
-optional. The free-text note is kept for the interest profile, where it
-carries the signal a vector cannot — "I want attacks, not surveys".
+An unlabelled thumbs-down gets the full default push, so explaining yourself
+stays optional.
 
-### Ranking and the interest profile
+### The interest profile
 
-Ranking is cosine similarity, diversified by MMR, with each pick attributed to the
-paper of yours it is nearest to. There is no model call anywhere in it.
+Ranking is similarity, diversification and attribution — no model call. But
+embeddings only capture "more like this". Only words carry "I already know RLWE
+hardness, stop showing me introductions".
 
-The profile is the piece that makes this an advisor rather than a similarity search.
-Embeddings capture "more like this"; only words carry "I already know RLWE hardness,
-stop showing me introductions". You write it — at `/profile`, in the browser — and
-every version is kept, so you can see how the picture of you changed.
-
-#### The profile steers retrieval
-
-Two of its sections are instructions rather than description, and retrieval reads them
-directly:
+So you write a profile, at `/profile`, and **two of its sections are
+instructions rather than description**:
 
 ```markdown
 ## More of
@@ -215,50 +149,65 @@ zero-knowledge proof systems and succinct arguments
 post-quantum migration policy surveys
 ```
 
-Each line is encoded by the same local model that encodes the corpus — SPECTER takes
-arbitrary text, not only papers — so a line under **More of** becomes a query vector and
-a line under **Less of** becomes something to steer away from, at the same full strength
-as a "wrong subfield" rejection. This is the one part of the advisor you drive with
-words instead of clicks: type it at `/profile` and it applies to your next batch.
+Each line is encoded by the same local model that encodes the corpus — SPECTER
+takes arbitrary text, not only papers — so a line under **More of** becomes a
+query vector, and one under **Less of** becomes something to steer away from,
+at the same strength as a "wrong subfield" rejection.
 
-Write them like paper titles, not sentences about yourself. That is what the encoder was
-trained on, and it shows — the top corpus matches for `lattice-based digital signatures`
-are CRYSTALS-Dilithium, *Sharper Ring-LWE Signatures* and *Asymptotically Efficient
-Lattice-Based Digital Signatures*; for `side-channel attacks on AES implementations`,
-*Algebraic Side-Channel Collision Attacks on AES* and *Masking of AES*.
+Write them like paper titles, not sentences about yourself. That is what the
+encoder was trained on, and it shows: the top corpus matches for `lattice-based
+digital signatures` are CRYSTALS-Dilithium, *Sharper Ring-LWE Signatures* and
+*Asymptotically Efficient Lattice-Based Digital Signatures*.
 
-A stated interest is one interest among your others, not an override: it takes its share
-of the results alongside what you have read, weighted by `profile_weight`. A profile is
-also enough on its own — with an empty library, saying what you want is a complete
-starting point.
+A stated interest is one interest among your others, not an override. A profile
+is also enough on its own — with an empty library, saying what you want is a
+complete starting point. Everything under other headings is prose, for you to
+read; `/profile` tells you which of your lines are actually steering anything.
 
-The remaining sections stay prose, for you to read. A profile that is all prose simply
-steers nothing; `/profile` tells you which case you are in.
+### Following people
 
-#### Talking to an assistant about it
+Embeddings cannot answer "what has this group published since", and a followed
+author's next paper may not resemble anything in your library — which is often
+exactly why you want it. So follows are retrieved **by name, outside the vector
+search**, and lead each batch:
+
+```
+[  --  ] Topology-Hiding Computation From Key Agreement in Diameter-Two…
+         By Shafi Goldwasser, whom you follow.
+[0.915] Cryptanalysis of a (Somewhat) Additively Homomorphic Encryption…
+         Closest to "Fully Homomorphic Encryption over the Integers", which you read.
+```
+
+They carry no similarity score, because similarity had no part in choosing them.
+
+Names match on surname plus given name, accents folded, so "Henry
+Corrigan-Gibbs" and "H. Corrigan-Gibbs" are one person. Initials are treated as
+initials only when one side actually abbreviates: **"Wei Chen" matches "W. Chen"
+but not "Wen Chen"**. Reducing both to `chen|w` — the obvious first
+implementation — turned one followed author into four on a corpus this size.
+
+### Talking to an assistant about it
 
 `advisor mcp` serves your library, the corpus and your profile over the Model
-Context Protocol, so an assistant you already run — Claude Desktop, say — can
-consult them. **The direction is the opposite of the usual integration: the
-advisor never calls a model.** It answers questions and holds no credential;
-the client launches it over stdio, so nothing listens on a port and nothing
-leaves the machine except what you ask the assistant.
+Context Protocol, so an assistant you already run can consult them. **The
+direction is the opposite of the usual integration: the advisor never calls a
+model.** It answers questions, holds no credential, and speaks over a pipe to a
+client that launches it, so nothing listens on a port.
 
-On Linux the client to use is **Claude Code** — a CLI, unlike Claude Desktop,
-which is macOS and Windows only:
+On Linux the client is **Claude Code**, a CLI (Claude Desktop is macOS and
+Windows only):
 
 ```sh
 claude mcp add research-advisor -- "$PWD/.venv/bin/advisor" mcp
 claude mcp list          # should say ✔ Connected
-claude                   # start a session; ask "what have I been reading?"
+claude                   # then ask "what have I been reading?"
 ```
 
-`advisor mcp --config` prints that command with the right absolute path, plus
-the JSON form for any other client. MCP servers load at startup, so a session
-that was already open will not see it.
+`advisor mcp --config` prints that with the right absolute path, plus the JSON
+form for other clients. MCP servers load at startup, so an already-open session
+will not see it.
 
-Three prompts and twelve tools. The prompts are the workflows you start
-deliberately — in Claude Code they appear as slash commands:
+Three prompts, appearing as slash commands:
 
 | | |
 |---|---|
@@ -266,115 +215,107 @@ deliberately — in Claude Code they appear as slash commands:
 | `/explore <topic>` | work out what a direction is really called, then steer toward it |
 | `/review_feed` | go through the current batch and say which of it is noise |
 
-They are not templates. Each reads the database first and arrives carrying the
-evidence — `/refresh_profile` embeds your library, ratings and notes, so the
-conversation opens with the facts rather than spending three tool calls
-collecting them, and `/explore` searches the corpus before it asks anything, so
-the discussion starts from real titles instead of your guess at the vocabulary.
-Each ends by asking you to confirm before it writes, because you invoked a
-discussion rather than an edit.
+They are not templates — each reads the database first and arrives carrying the
+evidence, and `/explore` searches the corpus before asking anything, so the
+discussion starts from real titles rather than your guess at the vocabulary.
+Of the twelve tools, nine are read-only; the three that write are the profile
+and following, each annotated so the client asks first. Nothing can delete a
+paper or reset the database.
 
-Of the tools, nine are read-only — your library, your ratings and notes,
-full-text search, one paper in full, the current feed, a preview of what would
-be recommended, the profile and its evidence. Three write: `write_interest_profile`,
-`follow_author`, `unfollow_author`. Each declares which it is, so a client can
-ask before changing anything, and there is deliberately no tool that deletes a
-paper, clears your library or resets the database.
+If you would rather not set that up, `advisor profile --brief` prints the same
+evidence and instructions as text, to paste into whatever assistant you like.
 
-What it makes possible is the conversation the app itself cannot have: *"what
-have I been reading lately"*, or *"I want to move toward verifiable computation
-— what is that literature actually called, and write me the steering lines for
-it"*. The last one matters because the assistant can search the corpus for the
-real vocabulary first, then write `## More of` lines that work, which is the
-part most people would rather not phrase themselves. Every save is a new
-version you can read and revert at `/profile`.
-
-#### If you would rather not write it yourself
-
-`advisor profile --brief` (and a panel at `/profile`) prints your reading, your ratings
-and your notes, together with instructions for turning them into a profile. Copy it into
-whatever assistant you already have — Claude on the web, say — and paste the answer back
-into the editor. You get a written profile without this program holding a credential or
-spending anything, and because it is text you carry by hand, you can read exactly what
-you are sending before you send it.
-
-There is deliberately no button that does this for you. **The advisor holds no API key,
-reads no credential from the environment, and makes no network call except to arXiv,
-ePrint and Crossref when harvesting.** `tests/test_no_api.py` asserts all three, so
-re-adding one has to be a decision somebody makes on purpose rather than a dependency
-that creeps back.
-
-#### Why every recommendation still comes with a reason
+### Why every recommendation comes with a reason
 
 ```
 3. [0.943] (2026) GPU Acceleration of Learning With Errors KEMs Using OpenACC
-      Closest to “Portable Acceleration of Lattice KEMs for Post-Quantum
-      Cryptography”, which you read (cosine 0.95).
+      Closest to "Portable Acceleration of Lattice KEMs for
+      Post-Quantum Cryptography", which you read (cosine 0.95).
 ```
 
-Naming the paper that pulled a recommendation in is the honest answer to "why am I
-being shown this" — it is literally what drove the match, it costs one matrix product,
-and it is often easier to check than a written justification, because you recognise the
-paper it names. Papers you have explicitly disliked are never offered as the reason for
-a new one.
+Naming the paper that pulled a recommendation in is the honest answer to "why
+am I being shown this" — it is literally what drove the match, it costs one
+matrix product, and it is easier to check than a written justification, because
+you recognise the paper it names. Papers you have explicitly disliked are never
+offered as the reason for a new one.
 
 ### How it stays current
 
-Both sources are harvested over OAI-PMH, whose `from` parameter filters on **modification**
-date rather than submission date. That matters more than it sounds:
+Both sources are harvested over OAI-PMH, whose `from` parameter filters on
+**modification** date rather than submission date. That matters more than it
+sounds:
 
-- **Revisions are picked up.** When an author posts a v2 with a rewritten abstract, the
-  record comes back and the stored abstract is replaced. Since the abstract is what gets
-  embedded, harvesting on submission date instead would leave recommendations computed
+- **Revisions are picked up.** When an author posts a v2 with a rewritten
+  abstract, the stored abstract is replaced. Since the abstract is what gets
+  embedded, harvesting on submission date would leave recommendations computed
   from text the author had already replaced.
-- **Late cross-listings appear.** A paper moved into `cs.CR` months after submission shows
-  up on the next run.
-- **Withdrawals are recorded.** Deleted records set `withdrawn_at`, so the paper stops
-  being recommended — but the row survives, because a paper already in your library should
-  not vanish from your history.
+- **Late cross-listings appear.** A paper moved into `cs.CR` months after
+  submission shows up on the next run.
+- **Withdrawals are recorded.** Deleted records set `withdrawn_at`, so the paper
+  stops being recommended — but the row survives, because a paper already in
+  your library should not vanish from your history.
 
 Merging follows two rules. A record arriving again **from the same source** is
-authoritative and replaces the stored content. A record matched **across sources** (same
-title and an overlapping author) fills in gaps and adds its identifier, but never
-overwrites a fuller record with a terser one — and category lists always union, so a paper
-on both arXiv and ePrint keeps both taxonomies.
+authoritative and replaces the stored content. A record matched **across
+sources** (same title and an overlapping author) fills in gaps and adds its
+identifier, but never overwrites a fuller record with a terser one — and
+category lists always union, so a paper on both archives keeps both taxonomies.
 
-Data lives in `~/.local/share/advisor/`; settings, if you want any, go in
-`~/.config/advisor/config.toml` (see `advisor/config.py` for the keys and defaults).
+## Your data, and sharing this
 
-## Status
-
-| Phase | | |
-|---|---|---|
-| 1 | Skeleton, library, ID resolution | **done** |
-| 2 | Corpus harvest from arXiv + ePrint | **done** |
-| 3 | Embeddings and vector retrieval | **done** |
-| 4 | Feedback loop | **done** |
-| 5 | The interest profile and profile-steered retrieval | **done** |
-| 6 | Scheduling and polish | **done** |
-
-Phase 3 adds dependencies deliberately kept out of the base install:
+Your library, ratings, notes, profile and follows live in
+`~/.local/share/advisor/`. **They are not in this repository and never go into
+it** — every example above is invented.
 
 ```sh
-.venv/bin/pip install -e '.[embed]'   # sentence-transformers, onnxruntime, numpy, scikit-learn
-.venv/bin/pip install -e '.[mcp]'     # the MCP server, if you want `advisor mcp`
+advisor export mine.json     # take it to another machine, or keep as a backup
+advisor import mine.json     # merges by default
 ```
 
-### Embedding: you do not wait for it
+The same pair is at `/data` in the browser. Paper ids are local numbers, so an
+export carries each remembered paper's real identifiers *and* enough metadata to
+recreate it — an import works against an empty database, before anything has
+been harvested. Importing twice changes nothing.
 
-`advisor embed` encodes the corpus locally with SPECTER. The full 76k papers take roughly
-3 hours on CPU, but the tool is useful within a couple of minutes and never blocks on it:
+The corpus travels separately, with `advisor snapshot`, because it is the
+opposite kind of thing: large, public, identical for everyone, and expensive to
+rebuild.
 
-- Work is ordered **library first, then a spread across years** — the newest paper of every
-  year, then the second newest, and so on. Partial results are therefore representative
-  rather than skewed to whatever is currently fashionable.
-- It is resumable. Stop it, rerun it, it picks up where it left off.
-- Recommendations run against whatever is embedded so far and simply get deeper.
-- It defaults to an int8 ONNX graph, measured 4.5x faster than torch fp32 (2.4 -> 10.9
-  papers/s) for vectors agreeing at 0.988 mean cosine and ~85% top-10 neighbour overlap.
-  Set `embedding_backend = "torch"` for exact fp32 vectors at 4x the wall clock.
+```sh
+advisor snapshot save corpus.tar    # ~151 MB, about 5 seconds
+advisor snapshot load corpus.tar    # about 15 seconds, versus 3 hours of encoding
+```
 
-After the first pass, a day's new papers take about ten seconds.
+Vectors ship as float16, which halves 223 MB to 112 MB: they are unit vectors,
+and against the float32 originals the top-10 and top-50 neighbours come back
+identical, with a largest cosine error of 3e-5. The metadata is gzipped JSON
+Lines, 134 MB down to 42 MB. The result is too big for a file in a git
+repository (100 MB limit) and belongs in a **release asset** (2 GB limit)
+anyway, being a build artifact rather than source.
+
+A snapshot contains no library, ratings, notes or profile — the tests assert it.
+
+## Running unattended
+
+`advisor update` is the whole nightly job. The three steps belong together:
+harvesting without embedding leaves new papers invisible to retrieval, and
+embedding without a run leaves them out of the feed.
+
+- **The embed pass is bounded** (`--max-minutes`, default 30), so the first run
+  after a backfill cannot hold the machine for hours; the remainder is picked up
+  the following night.
+- **Passes cannot overlap.** A manual `advisor embed` and a scheduled `advisor
+  update` take an advisory lock, because both rewrite the vector matrix
+  wholesale and the loser would silently discard the winner's work.
+
+`advisor schedule` prints a ready-made systemd timer and crontab line pointing
+at this installation's absolute path. It installs nothing.
+
+## Configuration
+
+Settings, if you want any, go in `~/.config/advisor/config.toml`. See
+`advisor/config.py` for the keys and defaults — which categories to harvest, how
+far back, how many recommendations, how hard a "More of" line pulls.
 
 ## Tests
 
@@ -382,11 +323,17 @@ After the first pass, a day's new papers take about ten seconds.
 .venv/bin/python -m pytest
 ```
 
-Parser tests run against saved API responses in `tests/fixtures/`, so the suite needs no
-network.
+No network required: parser tests run against saved API responses in
+`tests/fixtures/`. `tests/test_no_api.py` asserts that no model SDK is imported
+anywhere, that no credential is read from the environment, and that the
+recommendation pipeline has no seam a client could be passed through.
 
 ## Attribution
 
 Paper metadata comes from the [arXiv API](https://arxiv.org), the
-[Cryptology ePrint Archive](https://eprint.iacr.org) (© IACR and the respective authors,
-harvested via OAI-PMH under its stated terms), and [Crossref](https://www.crossref.org).
+[Cryptology ePrint Archive](https://eprint.iacr.org) (© IACR and the respective
+authors, harvested via OAI-PMH under its stated terms), and
+[Crossref](https://www.crossref.org). A corpus snapshot redistributes that
+metadata; check those terms before publishing one broadly.
+
+Licensed under the MIT License — see [LICENSE](LICENSE).

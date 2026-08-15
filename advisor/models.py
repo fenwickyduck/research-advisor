@@ -231,6 +231,13 @@ def upsert_paper(conn: sqlite3.Connection, paper: Paper) -> int:
         elif incoming and (not current or (same_source and incoming != current)):
             changed[name] = incoming
 
+    # title_norm is the cross-source dedupe key, derived from the title. A
+    # revision that retitles a paper must recompute it, or the paper stops
+    # matching its own counterpart on the other archive — permanently, and
+    # silently, since nothing else reads the column.
+    if "title" in changed:
+        changed["title_norm"] = normalize_title(str(changed["title"]))
+
     if changed:
         assignments = ", ".join(f"{name} = ?" for name in changed)
         conn.execute(

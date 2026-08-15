@@ -13,7 +13,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 
 SCHEMA = """
 -- The corpus: everything harvested, most of it never seen by you.
@@ -206,6 +206,19 @@ def _init(conn: sqlite3.Connection) -> None:
         # Decoding on read hid this everywhere except full-text search, which
         # indexes the raw column and so could not find a tenth of the corpus.
         _unescape_json_columns(conn)
+
+    if current < 6:
+        # v6: title_norm was not recomputed when a revision changed the title,
+        # so retitled papers stopped matching their counterpart on the other
+        # archive. Repair the rows that drifted.
+        from advisor.models import normalize_title
+
+        for row in conn.execute("SELECT id, title, title_norm FROM papers").fetchall():
+            fresh = normalize_title(row["title"])
+            if fresh != row["title_norm"]:
+                conn.execute(
+                    "UPDATE papers SET title_norm = ? WHERE id = ?", (fresh, row["id"])
+                )
 
     if current < SCHEMA_VERSION:
         conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
