@@ -1,0 +1,84 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/" xmlns:arxiv="http://arxiv.org/schemas/atom" xmlns="http://www.w3.org/2005/Atom">
+  <id>https://arxiv.org/api/G2D7qjZIRGqasmEO+rWG3wUVRQM</id>
+  <title>arXiv Query: search_query=cat:cs.CR&amp;id_list=&amp;start=0&amp;max_results=3</title>
+  <updated>2026-08-15T15:13:14Z</updated>
+  <link href="https://arxiv.org/api/query?search_query=cat:cs.CR&amp;start=0&amp;max_results=3&amp;id_list=" type="application/atom+xml"/>
+  <opensearch:itemsPerPage>3</opensearch:itemsPerPage>
+  <opensearch:totalResults>50983</opensearch:totalResults>
+  <opensearch:startIndex>0</opensearch:startIndex>
+  <entry>
+    <id>http://arxiv.org/abs/2608.13465v1</id>
+    <title>Concept Drift Detection and Adaptive Retraining of Malware Classification Models</title>
+    <updated>2026-08-13T16:46:56Z</updated>
+    <link href="https://arxiv.org/abs/2608.13465v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2608.13465v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Concept drift refers to changes over time in the statistical properties of data, as compared to the data that was used to train a learning model. Machine learning models for malware detection or classification are particularly susceptible to performance degradation caused by concept drift, as attackers constantly modify existing malware. In this chapter, we analyze two machine learning-based approaches to automated concept drift detection-a novel approach based on One-Class Support Vector Machines (OCSVM) and a previously-studied technique based on Minibatch K-Means (MK-Means). For comparison we also consider Maximum Mean Discrepancy (MMD), a statistical technique for detecting changes in multidimensional data. We conduct an extensive series of experiments comparing the effectiveness of four learning models, namely, Multilayer Perceptron, Random Forest, Support Vector Machines, and eXtreme Gradient Boosting. For each of these models, we consider three distinct scenarios: A static scenario where no model retraining occurs, a periodic scenario where models are constantly retrained irrespective of concept drift, and a drift-aware scenario where models are only retrained when concept drift is detected. Under the drift-aware scenario, we analyze the tradeoff between accuracy and training efficiency using Pareto Front analysis. We find that all three concept drift detection techniques achieve classification accuracy comparable to periodic retraining, while offering substantially greater efficiency in terms of the number of models that must be retrained. In addition, drift-aware retraining based on our OCSVM technique generally outperforms the MK-Means and MMD approaches. Overall, these results provide strong evidence that we can accurately detect concept drift in malware classification models.</summary>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.AI" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CR" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-08-13T16:46:56Z</published>
+    <arxiv:comment>To appear as a chapter in the book "Artificial Intelligence for Cyber Defense in Emerging Threats", to be published by Springer by early 2027</arxiv:comment>
+    <arxiv:primary_category term="cs.LG"/>
+    <author>
+      <name>Christofer Washington Berruz Chungata</name>
+    </author>
+    <author>
+      <name>Martin Jurecek</name>
+    </author>
+    <author>
+      <name>Katerina Potika</name>
+    </author>
+    <author>
+      <name>William B. Andreopoulos</name>
+    </author>
+    <author>
+      <name>Mark Stamp</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2608.13450v1</id>
+    <title>LLM-Assisted Dynamic Threat Analysis for Attacker-Reachable Software Weaknesses in Autonomous Vehicles</title>
+    <updated>2026-08-13T16:33:44Z</updated>
+    <link href="https://arxiv.org/abs/2608.13450v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2608.13450v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Autonomous vehicles depend on large safety-critical software stacks, where weaknesses reachable from adversarial inputs may affect steering, braking, or other control decisions. Static analysis can identify candidate sites, but dynamically confirming exploitability requires executable test artifacts that are difficult to construct manually. We investigate whether large language models (LLMs) can automate this process for Autoware, an open-source autonomous-driving stack. We perform compiler-precise static analysis across 185 packages, identifying 1,375 decision rules, 2,274 validation checks, and 482 input-to-safety-output flows, from which we derive a weakness taxonomy and sample 740 reachable sites. Two local open-weight LLMs, a no-static-context ablation, and a naive-template baseline generate 3,700 artifact sets, which are compiled against the real build under sanitizers, repaired through compiler-in-the-loop feedback, and fuzzed when executable. The main result is a build-integration failure taxonomy showing that 80% of first-shot compilation failures arise from dependency wiring rather than program logic. The reasoning model compiled 64% of harnesses on the first attempt, compared with 6% for the code-specialized model. Repair achieved full object-compileability for the reasoning model only through extensive stubbing; fewer than half of its harnesses reached the fuzzer, and all 37 observed crashes originated in stubbed code rather than Autoware. No candidate weakness was dynamically confirmed within budget. These results show that build integration, not candidate generation or fuzzing, is the primary barrier to reliable LLM-assisted dynamic analysis of full autonomous-vehicle software stacks.</summary>
+    <category term="cs.SE" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CR" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.LG" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-08-13T16:33:44Z</published>
+    <arxiv:comment>17 pages, 8 figures, 8 tables</arxiv:comment>
+    <arxiv:primary_category term="cs.SE"/>
+    <author>
+      <name>Md Wasiul Haque</name>
+    </author>
+    <author>
+      <name>Sagar Dasgupta</name>
+    </author>
+    <author>
+      <name>Mizanur Rahman</name>
+    </author>
+    <author>
+      <name>Md Rayhanur Rahman</name>
+    </author>
+  </entry>
+  <entry>
+    <id>http://arxiv.org/abs/2608.13404v1</id>
+    <title>Does Fixing Break Security? An Empirical Study of Security Degradation in Iterative LLM-Driven Infrastructure-as-Code Repair</title>
+    <updated>2026-08-13T16:01:32Z</updated>
+    <link href="https://arxiv.org/abs/2608.13404v1" rel="alternate" type="text/html"/>
+    <link href="https://arxiv.org/pdf/2608.13404v1" rel="related" type="application/pdf" title="pdf"/>
+    <summary>Background: Iterative feedback loops are the dominant paradigm for improving LLM-generated Infrastructure-as-Code (IaC): validators such as Checkov and terraform validate feed error signals back for successive repair attempts. Prior work reports cumulative-best metrics, which are non-decreasing by construction, so the raw per-iteration security trajectory has never been examined for IaC. Aims: We study security regression (a previously-passing CIS Benchmark check that fails after a repair iteration) to determine whether and how often iterative LLM repair degrades security while fixing other issues. Method: We analyze 5,968 scenario timelines from the IaC-Eval benchmark, each one scenario run through one configuration for up to 5 repair iterations. The 15 configurations (six model-specific RAG, nine model-aggregated non-RAG, three temperatures each) yield 4,440 iteration transitions with Checkov data on both sides. We track 30 individual CIS check IDs and classify root causes from code diffs, under two detection modes: standard (inclusive) and strict (exclusive check failures only). Results: Under standard detection, 13.8% of scenarios (24.8% of transitions) exhibit at least one regression. Under strict detection the rate falls to 3.3% of scenarios (5.2% of transitions), indicating most apparent regressions are multi-resource measurement artifacts. Resource restructuring (79.0%) is the dominant root cause. Regression transitions show 2.6x more code churn (Cohen's d=0.90) and 4.9x higher strict-mode check volatility (d=1.49). Of standard-mode regressions, 36.6% self-correct within an average of 1.2 iterations; iteration 3 is the optimal stopping point. Conclusions: Iterative IaC repair does introduce security regressions, but the conservative, defensible rate is about 3.3% of scenarios. Our findings motivate security-aware feedback-loop design and actionable iteration-budget guidance.</summary>
+    <category term="cs.SE" scheme="http://arxiv.org/schemas/atom"/>
+    <category term="cs.CR" scheme="http://arxiv.org/schemas/atom"/>
+    <published>2026-08-13T16:01:32Z</published>
+    <arxiv:comment>20 pages, 3 figures, 5 tables. Accepted at the 20th International Symposium on Empirical Software Engineering and Measurement (ESEM 2026). To appear in LIPIcs Vol. 394</arxiv:comment>
+    <arxiv:primary_category term="cs.SE"/>
+    <author>
+      <name>Benjamin Agyekum</name>
+    </author>
+    <author>
+      <name>Fabio Santos</name>
+    </author>
+  </entry>
+</feed>

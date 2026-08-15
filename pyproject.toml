@@ -1,0 +1,39 @@
+[project]
+name = "research-advisor"
+version = "0.1.0"
+description = "A personal research advisor: track what you've read, get recommended what to read next."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "jinja2>=3.1",
+    "httpx>=0.27",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+# Phase 3+. Heavy (torch); installed separately so the web app stays quick to set up.
+embed = [
+    "sentence-transformers>=3.0",
+    "numpy>=1.26",
+    "scikit-learn>=1.5",
+    # Int8 ONNX inference — ~4.5x faster than torch fp32 on CPU.
+    "onnxruntime>=1.17",
+    "optimum[onnxruntime]>=1.20",
+]
+dev = [
+    "pytest>=8.0",
+]
+
+[project.scripts]
+advisor = "advisor.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["advisor*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

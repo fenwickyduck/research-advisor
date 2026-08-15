@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Add papers · Research Advisor{% endblock %}
+
+{% block content %}
+<h1>Add papers</h1>
+
+<p class="hint">
+  One per line. arXiv IDs (<code>2401.12345</code>), ePrint IDs (<code>2024/123</code>),
+  DOIs (<code>10.1007/…</code>), or any URL containing one.
+</p>
+
+<form hx-post="/add/preview" hx-target="#preview" hx-swap="innerHTML" hx-indicator="#spinner">
+  <textarea name="ids" rows="10" autofocus placeholder="2401.12345
+https://eprint.iacr.org/2024/123
+10.1007/3-540-48910-X_16"></textarea>
+  <div class="actions">
+    <button type="submit">Look these up</button>
+    <span id="spinner" class="htmx-indicator">resolving…</span>
+  </div>
+</form>
+
+<div id="preview"></div>
+{% endblock %}

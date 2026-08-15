@@ -1,0 +1,813 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<?xml-stylesheet type="text/xsl" href="/css/oai2.xsl" ?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
+         http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>2026-08-15T15:38:27Z</responseDate>
+  
+<request verb="ListRecords" from="2026-08-14"
+  metadataPrefix="oai_dc">https://eprint.iacr.org/oai</request>
+<ListRecords>
+
+
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1693</identifier> 
+   <datestamp>2026-08-15T03:46:13Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1693</dc:identifier>
+      <dc:title>The ePrint:2026/1591 Quantum Algorithm Does Not Solve DCP</dc:title> 
+      <dc:creator>Aparna Gupte</dc:creator>
+      <dc:creator>Seyoon Ragavan</dc:creator>
+      <dc:creator>Mark Zhandry</dc:creator>
+      
+      <dc:subject>Attacks and cryptanalysis</dc:subject>
+      <dc:description>In this note, we formally show that the recent algorithm by Simon (ePrint:2026/1591, August 11 2026) does not extract the least-significant bit of the dihedral coset problem (DCP) secret with non-negligible guessing advantage, and therefore does not solve DCP. We emphasize that our result is not merely about Simon&#39;s analysis of his algorithm; we are showing directly that the algorithm cannot possibly work.
+
+Our no-go encompasses a much broader class of algorithms than the specific algorithm by Simon. The main message of our no-go is that an algorithm for DCP following the template of the reduction by Regev (SIAM Journal on Computing, 2004) will probably have to make extensive use of the classical Fourier labels in the uncomputation stage. On the other hand, the algorithm by Simon can be implemented, up to error $\mathsf{poly}(n)2^{-n/3}$, using only the most-significant third of the classical Fourier labels, and therefore cannot succeed.
+
+To help with verifiability, we release Lean 4 code for our results, available at https://github.com/sragavan99/lean-ePrint-2026-1591-refutation.</dc:description> 
+      <dc:date>2026-08-15T03:46:13Z</dc:date>
+      <dc:date>2026-08-15T03:46:13Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1692</identifier> 
+   <datestamp>2026-08-15T02:00:31Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1692</dc:identifier>
+      <dc:title>From Round Skipping to S-Box Skipping: Attacking Poseidon&#39;s Partial Layer via Subspace Restriction</dc:title> 
+      <dc:creator>Amit Singh Bhati</dc:creator>
+      <dc:creator>Sundas Tariq</dc:creator>
+      <dc:creator>Tomer Ashur</dc:creator>
+      
+      <dc:subject>Attacks and cryptanalysis</dc:subject>
+      <dc:description>Poseidon [Grassi, Khovratovich, Rechberger, Roy, and Schofnegger; USENIX&#39;21] is an arithmetization-oriented (AO) hash function designed to be efficient in real-world zero-knowledge (ZK) applications. We present GSR, a generalized S-box skipping gadget that absorbs a single initial full round and $t-2k$ partial rounds without increasing the polynomial degree of the Poseidon polynomial system with state size $t$ and input-output constraints $2k$. By restricting the subspace of the total constraints satisfying solutions, independent of the rounds constants and MDS matrix selection, the distinguisher expends input degrees of freedom to linearize the internal state transitions where the dense algebraic mixing usually occurs. This maps a computationally infeasible polynomial system into a bounded, low-degree ideal parameterized by $k$ free variables. 
+
+We show how to use the gadget to construct a probability 1 distinguisher over $t-2k+1$ rounds of Poseidon. We then show how this distinguisher can be used as a basis for interpolation-based attacks. We go on to present experimental solutions to the CICO-1 problem over 28 out of 31 rounds and CICO-2 problem over 25 out of 31 rounds in the setting set by the Ethereum Poseidon initiative (i.e., using the KoalaBear field with $t=24$ and $\alpha=3$). Crucially, since the subspace restriction approach is tuned only by $t$ and $k$, our results apply to the Poseidon structure regardless of the choice of round constants, MDS matrix, S-box exponent $\alpha$, or field size $p$.</dc:description> 
+      <dc:date>2026-08-15T02:00:31Z</dc:date>
+      <dc:date>2026-08-15T02:00:31Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1691</identifier> 
+   <datestamp>2026-08-14T14:30:35Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1691</dc:identifier>
+      <dc:title>Equivalence Between Average-Case Hardness of Learning and Cryptography for Mixed Quantum States</dc:title> 
+      <dc:creator>Alexandru Cojocaru</dc:creator>
+      <dc:creator>Laura Lewis</dc:creator>
+      
+      <dc:subject>Foundations</dc:subject>
+      <dc:description>The relationship between cryptography and learning theory has long been a central theme in the foundations of theoretical computer science: cryptographic primitives can imply hardness of learning, while hardness of learning can in turn be used to construct cryptographic schemes. Recent works have begun exploring analogous connections in the quantum setting, relating the average-case hardness of learning quantum states (AHL) to cryptographic primitives such as one-way state generators (OWSG). Despite recent progress exploring this for pure states, the relationship for mixed states has remained an open question.
+
+In this work, we prove that the existence of AHL for mixed quantum states is equivalent to the existence of inefficiently verifiable one-way state generators (IV-OWSGs). As a consequence, this relates mixed-state AHL to EFI pairs. Moreover, as a corollary of existing results, we obtain a separation between IV-OWSGs and OWSGs relative to the SWAP oracle.</dc:description> 
+      <dc:date>2026-08-14T14:30:35Z</dc:date>
+      <dc:date>2026-08-14T14:30:35Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1690</identifier> 
+   <datestamp>2026-08-14T12:07:14Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1690</dc:identifier>
+      <dc:title>Concurrently Secure Compact Blind Signatures from Module-SIS</dc:title> 
+      <dc:creator>Olivier Blazy</dc:creator>
+      <dc:creator>Lola-Baie Mallordy</dc:creator>
+      <dc:creator>Weiqiang Wen</dc:creator>
+      
+      <dc:subject>Cryptographic protocols</dc:subject>
+      <dc:description>A blind signature scheme allows a user to interact with a signer to obtain a valid signature on a message, while ensuring that the signer cannot learn any information on the message being signed, nor link a given couple message-signature to the specific interaction that produced it (blindness). In round-optimal (i.e., two-move) blind signature schemes, a user sends a request (typically a commitment) for a message, and the signer responds with a signature.  To achieve blindness, the resulting blind signature usually consists of a zero-knowledge proof of knowledge of a valid signature from the signer on a request. This reliance on zero-knowledge proofs has become the main bottleneck in reducing the blind signature size. In particular,  state-of-the-art  lattice-based blind signature schemes are instantiated based on  the zero-knowledge proof system from [Lyubashevsky et al., EUROCRYPT, 2022], which results in blind signatures of at least 22 KB.
+In this work, we carefully design a blind signature protocol following the classical lattice-based  Σ-protocol as in [Ducas et al., CRYPTO, 2013], so that the last component naturally forms a short preimage of the hash of the message, as a classical GPV signature. As a result, this removes the need for  zero-knowledge proofs in the blind signature. Eventually, this design allows us to obtain a significantly more compact blind signature of size 4.7 KB,  with concurrent security under the Module-SIS assumption. As a trade-off, our protocol may require more than one round with small probability, due to the rejection sampling in lattice-based  Σ-protocols. Under our proposed parameters, however, the expected number of rounds for honest users can be as small as 1.1, which is very close to optimal. To minimize the number of rounds, we require users to prove  that they failed to derive a blind signature in the previous round, before starting a new one. This technique yields a moderately looser bound on the expected number of rounds for malicious users, who will be forced to terminate in at most 2.6 rounds.</dc:description> 
+      <dc:date>2026-08-14T12:07:14Z</dc:date>
+      <dc:date>2026-08-14T12:07:14Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1689</identifier> 
+   <datestamp>2026-08-14T10:11:37Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1689</dc:identifier>
+      <dc:title>A Hybrid Post-Quantum Encryption Architecture with Self-Hosted Key Management for SME Cloud Data Protection</dc:title> 
+      <dc:creator>Muhammad Shaheer Bin Junaid</dc:creator>
+      
+      
+      <dc:description>Harvesting ciphertext from cloud storage needs no quantum computer; decrypting it later does. That gap
+is the harvest-now-decrypt-later exposure: anything protected by RSA or ECDH today that must stay secret for
+decades is already compromised. Small and medium-sized enterprises are least able to respond: they neither run the
+infrastructure on which their data sits on nor employ a cryptographer. Bespoke migration suits firms with security
+budgets; a managed key service relocates trust rather than removing it. The obstacle is architectural, not cryptographic.
+We present Quantum Cloud Guard (QCG), a software-only three-layer architecture. No prior SME-oriented system
+combines its three elements: client-side hybrid post-quantum encryption, self-hosted key custody with client-verifiable
+ML-DSA-87 signatures on served keys, and an integrated application-layer abuse-prevention gateway. Files never
+leave the client: each is sealed under AES-256-GCM, its key wrapped to an ML-KEM-1024 public key from the
+enterprise’s key service. The enterprise alone administers it; it signs every key with ML-DSA-87, so a client that
+pinned it detects substitution. Separating key custody from data custody is the point: a provider holding both can read
+the data. On a 24 MHz STM32F407, ML-KEM-1024 key generation takes 40.8 ms and decapsulation 44.0 ms; on the
+server every post-quantum operation stays sub-millisecond, signing adding 0.24 ms per request. The service runs on
+a 4.49 EUR/month virtual server. Under sustained flooding, the in-process gateway Sentinel Gate rejected 98.8% of
+attack traffic while a legitimate client’s median latency moved from 621 to 625 ms. Being single-source, this shows
+filtering effectiveness, not DDoS resilience.</dc:description> 
+      <dc:date>2026-08-14T10:11:37Z</dc:date>
+      <dc:date>2026-08-14T10:11:37Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1688</identifier> 
+   <datestamp>2026-08-14T09:57:08Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1688</dc:identifier>
+      <dc:title>Hell’s Bells: A Neural Network Pipeline for Ternary Fast Matrix Multiplication Algorithms</dc:title> 
+      <dc:creator>Erik Mårtensson</dc:creator>
+      <dc:creator>Paul Stankovski Wagner</dc:creator>
+      <dc:creator>Joshua Stapleton</dc:creator>
+      
+      <dc:subject>Foundations</dc:subject>
+      <dc:description>We present a neural network-based pipeline for efficiently generating fast matrix multiplication (FMM) algorithms of small but arbitrary dimensions $(n,m,k)$. Our neural network is general and tunable to output FMM schemes with specific properties, and in this paper we specifically target aspects that are useful and important in practical implementation, such as ternarity (coefficients in $\{-1, 0, 1\}$), sparseness and a low number of additions after optimization (addition reduction carried out separately).
+
+We generate and optimize thousands of FMM algorithms and show that our generation method is beneficial in terms of performance across the entire FMM pipeline (both the FMM generation itself and optimization of additions).
+We discuss performance metrics and utilize heatmaps to visualize and understand this performance.
+
+We achieve record-low arithmetic (additive) complexity for various combinations of dimensions. For $(n,m,k) = (2,2,k)$, our method performs particularly well. Our improvement compared to previous results increases with $k$.
+
+We show that the (addition) optimization process can behave very differently depending on the dimensions considered, indicating how further improvements (beyond our results) can be targeted.
+In particular, in the $(n,m,k) = (2,2,k)$ setting, we show evidence of structural FMM properties coming into play, concretely showing that FMM generation with a minimal number of additions is sometimes suboptimal with respect to the entire FMM pipeline.
+
+Finally, we make our neural network implementation, our generated FMM schemes, heatmap utilities and datasets publicly available.</dc:description> 
+      <dc:date>2026-08-14T09:57:08Z</dc:date>
+      <dc:date>2026-08-14T09:57:08Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1687</identifier> 
+   <datestamp>2026-08-14T07:19:53Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1687</dc:identifier>
+      <dc:title>Theoretical Open Problems in Symmetric Cryptography: Verifiable LLM-Guided Analysis</dc:title> 
+      <dc:creator>Yufei Yuan</dc:creator>
+      <dc:creator>Yaoda Hu</dc:creator>
+      <dc:creator>Yixin Zhang</dc:creator>
+      <dc:creator>Lei Zhang</dc:creator>
+      <dc:creator>Wenling Wu</dc:creator>
+      
+      <dc:subject>Secret-key cryptography</dc:subject>
+      <dc:description>We present the Pilot--Sailor Framework, an LLM-guided system for studying theoretical open problems in symmetric cryptography. Pilot proposes intermediate statements and proof plans. Sailor attempts formal proofs, and the proof assistant admits only checked declarations to the verified context.
+We apply this methodology to Boolean-function theory and symmetric cryptanalysis through fourteen mathematical case studies, comprising complete resolutions, corrected formulations, counterexamples, and scoped quantitative advances. In particular, we prove the original pointwise Tu--Deng conjecture for all word lengths and admissible residues. We further characterize equality in this bound: if \(t\) has \(z\) zero bits, equality holds exactly when every cyclic gap between consecutive zeros is at least \(z\). This criterion also gives a closed formula for the number of equality cases for each \(z\). We also prove that, for \(n=2k\geq6\) and \(k&lt;m&lt;2k\), every mapping \(F:\mathbb F_2^n\to\mathbb F_2^m\) satisfies
+\(\operatorname{NL}(F)\leq2^{n-1}-2^{n/2-1}-2\). This improves both the covering-radius estimate and the bound obtained from Nyberg&#39;s obstruction and integrality. Using an exact computer-assisted spectral classification, we also prove that the maximum nonlinearity of a balanced Boolean function in eight variables is 116, resolving whether the value 118 can occur. Beyond the well-known long-standing problems highlighted above, we also establish new results for ten further research questions in symmetric cryptography.</dc:description> 
+      <dc:date>2026-08-14T07:19:53Z</dc:date>
+      <dc:date>2026-08-14T07:19:53Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1686</identifier> 
+   <datestamp>2026-08-14T03:43:24Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1686</dc:identifier>
+      <dc:title>A Unifying Umbrella for Circular-Secure Cryptographic Primitives</dc:title> 
+      <dc:creator>Fuyuki Kitagawa</dc:creator>
+      <dc:creator>Takahiro Matsuda</dc:creator>
+      
+      <dc:subject>Foundations</dc:subject>
+      <dc:description>The main message of this paper is that several seemingly different circular-style primitives are existentially equivalent. In particular, somewhat surprisingly, we show that hinting PRGs (Koppula and Waters, CRYPTO 2019) are equivalent to secret-key encryption (SKE) schemes satisfying key-dependent-message (KDM) security. As a conceptual centerpiece, we introduce key-dependent-shift (KDS) security for weak pseudorandom functions (PRFs), and show that they serve as a convenient hub connecting these primitives. We also show that KDS secure weak PRFs imply other cryptographic primitives with circular-style security, such as linear-resistant PRGs (Hajiabadi et al., ITC 2023) and hinting weak PRFs (Alamati and Patranabis, ASIACRYPT 2022), all of which are thus existentially equivalent to KDM secure SKE and hinting PRGs as well. Hence, KDS secure weak PRFs can be thought of as a unifying umbrella for circular-secure cryptographic primitives. As another application of our new notion, we show that KDS security enables new constructions of public-key encryption (PKE) satisfying randomness-dependent-message (RDM) security and correlated-product secure trapdoor functions (TDFs). Our key technical contribution is a generic construction of KDS secure weak PRFs from any KDM secure SKE.</dc:description> 
+      <dc:date>2026-08-14T03:43:24Z</dc:date>
+      <dc:date>2026-08-14T03:43:24Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1685</identifier> 
+   <datestamp>2026-08-14T00:22:34Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1685</dc:identifier>
+      <dc:title>Pruning Merkle-Tree Consistent Accumulator</dc:title> 
+      <dc:creator>Anna Mendonca</dc:creator>
+      <dc:creator>Hudson Shi</dc:creator>
+      <dc:creator>Ivan Pryvalov</dc:creator>
+      <dc:creator>Amir Herzberg</dc:creator>
+      
+      <dc:subject>Cryptographic protocols</dc:subject>
+      <dc:description>Authenticated data structures are widely used to compute compact
+digests of evolving collections of elements and to support efficient verification of element inclusion. However, the authenticated collection often should not grow forever: older elements may expire and no longer require verification. Many implemented append-only approaches, for example used in Certificate Transparency (CT), do not directly support this setting, since previously accumulated elements remain part of the authenticated state indefinitely. In this work, we introduce a pruning accumulator, a stateful accumulator that supports both incremental addition of new elements and pruning of an old prefix of previously accumulated elements. The resulting digest represents the unpruned sequence, while pruned elements are removed from the authenticated state. Unpruned elements continue to support proof-of-inclusion verification, proof
+updates, update verification, and consistency checks. This captures applications that require authenticated, incrementally maintained state over a moving window of elements.
+We present two constructions of Merkle-tree-based pruning accumulators, both with efficient accumulation, prefix pruning, proof generation, proof updating, and verification. The constructions preserve the standard Merkle-tree style of verification for active elements while reducing long-term storage requirements.
+We provide formal definitions, correctness and security analysis, an open-source implementation, and experimental evaluation demonstrating the performance benefits of pruning.</dc:description> 
+      <dc:date>2026-08-14T00:22:34Z</dc:date>
+      <dc:date>2026-08-14T00:22:34Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1681</identifier> 
+   <datestamp>2026-08-15T14:04:32Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1681</dc:identifier>
+      <dc:title>Aegon: Self-Auditable Key Transparency</dc:title> 
+      <dc:creator>Hossein Hafezi</dc:creator>
+      <dc:creator>Alireza Shirzad</dc:creator>
+      <dc:creator>Benedikt Bünz</dc:creator>
+      <dc:creator>Kevin Lewi</dc:creator>
+      <dc:creator>Dillon George</dc:creator>
+      <dc:creator>Joseph Bonneau</dc:creator>
+      
+      <dc:subject>Cryptographic protocols</dc:subject>
+      <dc:description>Key transparency enables a centralized encrypted messaging provider to publicly commit to the public keys it distributes, allowing clients to detect potentially malicious keys.  Recent deployments by WhatsApp and iMessage demonstrate the promise of this approach, but they rely on third-party global auditors to detect misbehavior by the key server.  No existing system supports auditing efficiently enough to be done by lightweight end users while also providing scalability to billions of users and short epoch latency.
+
+We present $\mathsf{Aegon}$, a key transparency scheme designed for global-scale encrypted messaging. Building on ideas from $\mathsf{IronDict}$, $\mathsf{Aegon}$ avoids per-epoch work that scales with the full dictionary size: its server computation depends only on the number of updates in the current epoch, eliminating global invariance proofs and enabling epoch latency of under a minute ($500\times$ reduction compared to $\mathsf{IronDict}$). $\mathsf{Aegon}$ further introduces a sharded dictionary design that reduces global parameters to shard-dependent sizes and enables horizontal scaling. To control long-term storage, $\mathsf{Aegon}$ uses proof caching to safely discard historical dictionary snapshots, so storage grows only with retained history. 
+
+We provide a production-grade Rust implementation of $\mathsf{Aegon}$ and demonstrate practical scalability to a dictionary with $4$ billion entries, comparing it against the public codebase of WhatsApp Key Transparency ($\mathsf{AKD}$). At the throughput of $1{,}250$ updates per second, $\mathsf{Aegon}$ produces constant-size auditor proofs of under $30$ KB, verifiable in under $65$ ms and independent of the number of updates per epoch or of the directory fill. At a fully-populated $2^{32}$-entry directory, this is roughly an $80{,}000\times$ reduction in audit proof size and a $370\times$ reduction in verify time relative to $\mathsf{AKD}$. All other server and client operations remain highly efficient and comparable to $\mathsf{AKD}$, while $\mathsf{Aegon}$ achieves stronger privacy guarantees.</dc:description> 
+      <dc:date>2026-08-13T19:22:37Z</dc:date>
+      <dc:date>2026-08-15T14:04:32Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1678</identifier> 
+   <datestamp>2026-08-15T14:07:44Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1678</dc:identifier>
+      <dc:title>Cryptanalytic Extraction of Multi-Head Softmax Attention Models</dc:title> 
+      <dc:creator>Sunan Wang</dc:creator>
+      <dc:creator>Hao Lei</dc:creator>
+      <dc:creator>Longxiang Wei</dc:creator>
+      <dc:creator>Qun Liu</dc:creator>
+      <dc:creator>Kai Hu</dc:creator>
+      <dc:creator>Meiqin Wang</dc:creator>
+      
+      <dc:subject>Attacks and cryptanalysis</dc:subject>
+      <dc:description>Since the seminal work of Carlini et al. at CRYPTO 2020, cryptanalytic model extraction has shown neural-networks parameters can be recovered from black-box queries. Existing attacks are largely built around piecewise-linear phenomena. Softmax attention, as the key component of the transformer architecture, presents a different extraction landscape: its nonlinearity is smooth and sequence-dependent, which renders the existing piecewise-linear-based method inapplicable. Recent work has investigated the learnability of a single-head attention model, while in the multi-head case, the parameters of the multi-head attention layer cannot be uniquely identified from value queries alone. 
+
+In this paper, we propose the first attack against multi-head attention models. We formalize the extractable representative of multi-head attention and give a polynomial-time algorithm for extracting the parameters of the canonical representative model. We also test our algorithm end to end under finite precision, and successfully extract the parameters of a softmax attention model with token dimension 8 and 6 heads to accuracy $2^{-51}$. Moreover, we overcome the limitation that existing parameter extraction algorithms for one-layer single-head Transformers fail when the ReLU feedforward networks (FFNs) include bias terms. The effectiveness of our approach is demonstrated through model extraction attacks in finite-precision experiments. These results show that softmax normalization itself exposes exploitable algebraic structure, extending cryptanalytic extraction beyond ReLU-centric techniques.</dc:description> 
+      <dc:date>2026-08-13T16:10:19Z</dc:date>
+      <dc:date>2026-08-15T14:07:44Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1650</identifier> 
+   <datestamp>2026-08-15T13:24:13Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1650</dc:identifier>
+      <dc:title>D-James: Ultra Short Multivariate Signatures</dc:title> 
+      <dc:creator>Jacques Patarin</dc:creator>
+      <dc:creator>Alexandre Roullet</dc:creator>
+      
+      <dc:subject>Public-key cryptography</dc:subject>
+      <dc:description>Multivariate signature schemes are among the few post-quantum candidates capable of providing very short signatures, but designing secure constructions has proven challenging. HFE-based schemes such as G$e$MSS were compromised by algebraic MinRank attacks. This motivates the HFE$_\text{IP}^-$ framework, which combines IP and minus modifiers to address these attacks. We introduce James and D-James, the latter achieving signatures of only 156 bits at the 128-bit classical security level and 348 bits at the 256-bit classical security level, among the shortest signatures reported for practical post-quantum public-key signature schemes, with estimated signing and verification costs comparable to those of G$e$MSS. The main technical contribution is the introduction of Dragon terms, which decouple the number of public equations from the hash output length, allowing the signature size to be reduced independently of the security parameter. We characterize the algebraic structure introduced by Dragon terms and show that it does not enable known MinRank attacks when combined with the HFE$_\text{IP}^-$ countermeasures. We also show that the known differential attack does not appear to extend to the minus variant. We further present parameter sets over both binary and small non-binary finite fields. For small values of $q&gt;2$, the public-key size decreases by up to a factor of 10, while signature size and computational cost remain close to the binary case.</dc:description> 
+      <dc:date>2026-08-10T16:15:46Z</dc:date>
+      <dc:date>2026-08-15T13:24:13Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1642</identifier> 
+   <datestamp>2026-08-14T09:33:14Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1642</dc:identifier>
+      <dc:title>A Torus-Structured Generalisation of NTRU: the NTC Assumption, its Cryptanalysis, and a Compact KEM</dc:title> 
+      <dc:creator>Sidoine Djimnaibeye</dc:creator>
+      <dc:creator>Djiby Sow</dc:creator>
+      <dc:creator>Mahamat Borgou Hassan</dc:creator>
+      
+      <dc:subject>Foundations</dc:subject>
+      <dc:description>We introduce Noisy Torus Conjugation (NTC), a lattice assumption in which a short secret is confined to a non-split maximal torus of $GL_k(R_q)$ and acts by conjugation on a uniform matrix, the result being masked by a short additive error. NTRU is the $k=1$ member of the family. Passing to $k \ge 2$ changes the geometry of the underlying lattice in two specific ways. The planted module occupies a fraction $1/(2k)$ of the published lattice&#39;s dimension, against NTRU&#39;s $1/2$; and the norm-map shortcut that governs the overstretched regime is blocked once the conjugated matrix is required to be uniform over the full matrix algebra instead of the torus.
+We develop the structure theory of the assumption: marginal uniformity of each component, invariance along the torus orbit, a rigidity theorem identifying the full set of short solutions, and a reduction from search to decision. On it we build an IND-CCA key encapsulation mechanism whose passive security reduces tightly to NTC together with one isolated decisional assumption. At NIST categories 1, 3 and 5 it reaches public keys within 1.08 to 1.16 times Kyber&#39;s and ciphertexts 2.0 to 2.1 times Kyber&#39;s.
+The new assumption is not load-bearing but purchasable. Widening the key distribution to the smoothing parameter of the key lattice would make the public key statistically uniform and remove it altogether, leaving IND-CPA on module-LWE and hence on a worst-case problem. We price that variant at a factor 3.4 on the public key and 4.0 on the ciphertext. It rests, however, on a regularity statement not established for the completely split rings our transform uses; we isolate that statement as a conjecture and give a modulus class for which it is not needed.
+Concrete parameters are selected with an estimator calibrated against the published core-SVP figures of Kyber, and validated against a hybrid
+meet-in-the-middle model whose single free constant is fitted on Kyber. The fatigue predictions underlying the modulus window are tested further by lattice reduction. We reduce small instances of the published lattice against NTRU controls of identical dimension, determinant and planted-vector norm, and at every modulus the NTRU plant is discovered as a dense sublattice while the sparser NTC plant is not. A companion paper builds a Fiat-Shamir-with-aborts signature from the same assumption. The assumption is new and has no worst-case reduction; we state throughout what is proved, what is heuristic, what is measured, and what remains open.</dc:description> 
+      <dc:date>2026-08-09T05:41:53Z</dc:date>
+      <dc:date>2026-08-14T09:33:14Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by-nc/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1605</identifier> 
+   <datestamp>2026-08-15T13:49:53Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1605</dc:identifier>
+      <dc:title>UC, Categorically: Rigorous Diagrammatic Proofs</dc:title> 
+      <dc:creator>Pooya Farshim</dc:creator>
+      <dc:creator>Martti Karvonen</dc:creator>
+      <dc:creator>Andre Knispel</dc:creator>
+      <dc:creator>Markulf Kohlweiss</dc:creator>
+      <dc:creator>Philip Wadler</dc:creator>
+      
+      <dc:subject>Foundations</dc:subject>
+      <dc:description>Category theory is a mathematical theory of composition, widely used in logic, computing, and physics. Here we apply it to give a theory of secure composition. In particular, we provide a categorical treatment of Canetti&#39;s Universal Composability (UC) framework for systems with a static number of parties and sessions, often termed UC for static systems, yielding four benefits. 
+
+First, we present our results graphically yet retain rigor by applying a standard categorical technique known as string diagrams. In particular, our formulation of the composition theorem can be graphically verified with a short sequence of diagrams, while remaining translatable to equations and amenable to formal verification. 
+
+Second, categories let us generalize so that our results extend beyond interactive Turing machines to other forms of computation, such as quantum computation or domain-specific languages. 
+
+Third, categories help us drop some unnecessary restrictions of UC (e.g., our adversary can be a computational network rather than a single Turing machine); we prove equivalence between our variant and the usual UC, showing no expressiveness is lost. 
+
+Finally, the categorical perspective leads us to identify and correct some minor technical oversights in the standard formulation of simple UC.</dc:description> 
+      <dc:date>2026-08-04T15:37:02Z</dc:date>
+      <dc:date>2026-08-15T13:49:53Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1581</identifier> 
+   <datestamp>2026-08-14T14:51:55Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1581</dc:identifier>
+      <dc:title>Post-Quantum Internet Key Exchange via Authenticated Forward-Secure KEM</dc:title> 
+      <dc:creator>Yunlei Zhao</dc:creator>
+      <dc:creator>Biming Zhou</dc:creator>
+      <dc:creator>Zhixiang Zhao</dc:creator>
+      <dc:creator>Yifan Dong</dc:creator>
+      <dc:creator>Cheng Huang</dc:creator>
+      <dc:creator>Haodong Jiang</dc:creator>
+      
+      <dc:subject>Cryptographic protocols</dc:subject>
+      <dc:description>In this work, we present a new framework for signature-free, post-quantum secure authenticated key exchange (AKE) that simultaneously satisfies:
+(1) exchanging at most two standard ciphertexts of a key encapsulation
+mechanism (KEM);
+(2) computational symmetry;
+(3) perfect forward secrecy (PFS);
+(4) strong resilience to secret-state exposure;
+(5) strong resistance to decryption-error attacks;
+(6) admitting instantiations based on the native structure of
+\textsf{ML-KEM} under the \textsf{MLWE} assumption; and
+(7) provable security in both the random oracle model (ROM) and the quantum-accessible random oracle model (QROM) under the post-id $\mathsf{eCK}\mbox{-}\mathsf{PFS}$ framework.
+This resolves several fundamental open questions in the literature.
+The core technical building block is a new cryptographic primitive, called an \emph{authenticated forward-secure} KEM (AFS-KEM), which unifies authentication and forward secrecy within a single KEM
+abstraction and may be of independent interest.</dc:description> 
+      <dc:date>2026-08-03T03:29:22Z</dc:date>
+      <dc:date>2026-08-14T14:51:55Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by-nc-nd/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1546</identifier> 
+   <datestamp>2026-08-15T08:19:44Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1546</dc:identifier>
+      <dc:title>Note on Number-Theoretic Transforms for Implementers -- Butterflies, Twisting, Incompleteness, and Good&#39;s Trick</dc:title> 
+      <dc:creator>Bo-Yin Yang</dc:creator>
+      
+      <dc:subject>Implementation</dc:subject>
+      <dc:description>We develop (mostly) the radix-2 number-theoretic transform (NTT) and
+  its butterflies, the twisting trick and why it never changes the
+  transform, the freedom to use Cooley--Tukey butterflies in both
+  directions, incomplete NTTs, Good&#39;s trick, and the ways all of these
+  combine---closing with the coefficient-bound bookkeeping that
+  motivates the whole toolkit.  This note is intended to help
+  implementers of postquantum cryptography, and is compressed from the
+  author&#39;s lecture notes and slides in his Postquantum Cryptography
+  class at National Taiwan University (2020--2025).  It may be
+  otherwise trivial for FFT experts who know the DIT--DIF equivalence
+  inside out---except that they tend not to encounter incomplete
+  NTTs (a term which, to the best of his knowledge, he originated 
+  in 2020) and negacyclic.</dc:description> 
+      <dc:date>2026-07-29T03:45:52Z</dc:date>
+      <dc:date>2026-08-15T08:19:44Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/816</identifier> 
+   <datestamp>2026-08-15T13:48:35Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/816</dc:identifier>
+      <dc:title>From Rerandtopia to Interceptopia, the Anamorphic Encryption Saga Rises</dc:title> 
+      <dc:creator>Vincenzo Botta</dc:creator>
+      <dc:creator>Dario Catalano</dc:creator>
+      <dc:creator>Emanuele Giunta</dc:creator>
+      <dc:creator>Francesco Migliaro</dc:creator>
+      <dc:creator>Daniele Venturi</dc:creator>
+      <dc:creator>Ivan Visconti</dc:creator>
+      
+      <dc:subject>Public-key cryptography</dc:subject>
+      <dc:description>Nowadays, governments are world-wide pushing towards building infrastructures to intercept, decrypt and prevent communications among citizens with the goal of catching criminals.
+The recent notion of anamorphic encryption proposed by Persiano et al. [Eurocrypt 2022] faces the risks of abuses derived from such infrastructures that could be maliciously leveraged to realize the phantom menace of large-scale mass-surveillance programs. 
+Several recent papers showed positive results on the existence of anamorphic encryption schemes, mostly confined to basic settings.
+
+In this work we consider  extreme scenarios where in addition to obtaining secret keys, the authority actively tries to sanitize ciphertexts removing covert communication. 
+Despite anamorphic encryption might look impossible to achieve in the above settings, we give new definitions and  somewhat surprising positive results in two scenarios: Rerandtopia and Interceptopia. 
+
+Our main construction consists of two layers of encryption. Interestingly, when carefully instantiated, our scheme achieves a notion of re-randomizable CCA encryption that outperforms the state of the art in terms of assumptions and efficiency.</dc:description> 
+      <dc:date>2026-04-25T13:40:53Z</dc:date>
+      <dc:date>2026-08-15T13:48:35Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/313</identifier> 
+   <datestamp>2026-08-14T12:12:36Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/313</dc:identifier>
+      <dc:title>Weak-Key Classes and Key Recovery in Key-Then-Hash Functions</dc:title> 
+      <dc:creator>Jonathan Fuchs</dc:creator>
+      
+      <dc:subject>Secret-key cryptography</dc:subject>
+      <dc:description>Handschuh and Preneel define a weak-key class by “unexpected” security behavior and efficient detection of class membership. Four families in their CRYPTO 2008 analysis, NH, NMH, WH, and Square Hash, fall within the later key-then-hash (KTH) formalism. For the controlled collision and fixed-difference attacks considered here, KTH offset-invariance shows that any nonempty solution set can be translated to contain any chosen absolute key while preserving its size, success probability, and the number and type of oracle queries. The exceptional behavior therefore cannot be attributed to particular absolute key values. The relative size of a solution set is exactly the corresponding collision or fixed-difference probability, which universality bounds.
+
+This does not make the attacks harmless. A successful controlled differential restricts the reusable key to a known solution set. If the current transcript leaves candidate set $C$ and a later test has solution set $S&#39;$, then its conditional success probability is $\#(C\cap S&#39;)/\#C$. Balanced intersections are information-theoretically optimal. Fixed-factor reductions give logarithmic recovery when realizable, while KTH translation alone gives an at-most-linear sequence of refinement tests up to translation symmetries.
+
+We give localization mechanisms for the serial and parallel KTH constructions and a Wegman–Carter–Shoup key-recovery attack on Serial instantiated with three-round Xoodoo. The attack completely recovers one reusable $384$-bit KTH key block. Published three-round Xoodoo differential trail cores and Daemen’s affine derivative analysis of the Xoodoo χ layer turn successful endpoint differentials into equations on the keyed state. Two suitable trails recover six complete three-bit columns, and $32$ cyclic translations recover all $384$ bits. When every trial uses a newly authenticated reference message, the attack requires $2^{42}$ expected differential trials, or about $2^{43}$ MAC-oracle calls. The target is Serial instantiated with three-round Xoodoo under Wegman-Carter-Shoup authentication, not Xoofff or six-round Xoodoo.</dc:description> 
+      <dc:date>2026-02-18T17:18:30Z</dc:date>
+      <dc:date>2026-08-14T12:12:36Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/242</identifier> 
+   <datestamp>2026-08-14T01:29:54Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/242</dc:identifier>
+      <dc:title>Neo and SuperNeo: Post-quantum folding with pay-per-bit costs over small fields</dc:title> 
+      <dc:creator>Wilson Nguyen</dc:creator>
+      <dc:creator>Srinath Setty</dc:creator>
+      
+      <dc:subject>Cryptographic protocols</dc:subject>
+      <dc:description>We construct the first folding scheme that simultaneously achieves six desirable properties: plausible post-quantum security, pay-per-bit commitment costs, field-native arithmetic (the sum-check and norm checks run purely over a small field), support for general (non-SIMD) constraint systems, small-field support (e.g., Goldilocks), and low recursion overheads. No existing scheme satisfies all six: group-based schemes (e.g., HyperNova) lack post-quantum security and are tied to large elliptic-curve fields; lattice-based schemes (e.g., LatticeFold) require expensive ring arithmetic, lose pay-per-bit costs, and impose SIMD constraints; and hash-based schemes (e.g., Arc) incur large verifier circuits.
+
+We present two lattice-based folding schemes for CCS, an NP-complete relation generalizing R1CS, Plonkish, and AIR, called Neo and SuperNeo. Neo satisfies five of the six properties but requires SIMD constraint systems; SuperNeo removes this restriction and satisfies all six. SuperNeo also natively supports CCS relations over arbitrary extension fields of the field underlying the Ajtai commitment, without relying on an NTT embedding. Both run a single invocation of the sum-check protocol over a small field extension and achieve pay-per-bit costs via new folding-friendly instantiations of Ajtai commitments under the Module-SIS assumption. At the core of our constructions are two new norm-preserving embeddings of field vectors into ring vectors that respect an evaluation homomorphism required for folding. We also introduce interactive reductions, a framework that generalizes reductions of knowledge and enables modular security proofs for composed lattice-based protocols.</dc:description> 
+      <dc:date>2026-02-13T04:03:41Z</dc:date>
+      <dc:date>2026-08-14T01:29:54Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2025/2321</identifier> 
+   <datestamp>2026-08-14T21:57:50Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2025/2321</dc:identifier>
+      <dc:title>High-Precision Exact FHE Made Simple, General, and Fast</dc:title> 
+      <dc:creator>Chris Peikert</dc:creator>
+      <dc:creator>Doron Zarchy</dc:creator>
+      <dc:creator>Guy Zyskind</dc:creator>
+      
+      <dc:subject>Foundations</dc:subject>
+      <dc:description>Many important applications of fully homomorphic encryption (FHE) require arithmetic on *high-precision* plaintexts, e.g., from the ring $\mathbb{Z}_p$ for a huge prime or power-of-two modulus $p$.
+The classic FHE schemes are poorly suited to this, because the inverse error rate of fresh ciphertexts, and the error growth under homomorphic multiplication, are both larger than $p$, which results in large and inefficient parameters.
+While there are now several works addressing this problem, the landscape for *exact* (as opposed to approximate) FHE is highly fragmented: known solutions either work only for certain rare plaintext moduli having very special forms (sometimes using non-standard ciphertext rings that lack other important features for FHE), or have quite complicated and high-latency constructions.
+
+This work gives a very simple, general, and efficient technique for high-precision exact FHE, in which the error rates and growth match those of classic schemes for *exponentially smaller* precision.
+The runtimes can scale only *quasi-linearly* (versus quadratically for classic schemes) with the plaintext precision $\log p$, and are fast in practice.
+Also in contrast to all prior works, our technique works for *any integer modulus* and over *any underlying (number) ring*---or even with no structured ring at all, making it the first solution that can be based on plain LWE.
+Moreover, it is *fully compatible with prior FHE techniques* for fast ring arithmetic, plaintext packing and SIMD operations, bootstrapping, etc.
+For typical parameters and security levels, our (preliminary, unoptimized, single-threaded) implementation does homomorphic $\mathbb{Z}_{2^{64}}$-multiplication in just tens of milliseconds, and obtains a four- to five-fold increase in multiplicative depth versus classic FHE schemes.</dc:description> 
+      <dc:date>2025-12-24T11:22:27Z</dc:date>
+      <dc:date>2026-08-14T21:57:50Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by-nc-nd/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2025/1455</identifier> 
+   <datestamp>2026-08-15T01:25:52Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2025/1455</dc:identifier>
+      <dc:title>Fully-Fluctuating Participation in Sleepy Consensus</dc:title> 
+      <dc:creator>Yuval Efron</dc:creator>
+      <dc:creator>Joachim Neu</dc:creator>
+      <dc:creator>Toniann Pitassi</dc:creator>
+      
+      
+      <dc:description>Proof-of-work allows Bitcoin to boast security amidst arbitrary fluctuations in participation of miners throughout time, so long as, at any point in time, a majority of hash power is honest. In recent years, however, the pendulum has shifted in favor of proof-of-stake-based consensus protocols. There, the sleepy model is the most prominent model for handling fluctuating participation of nodes. However, to date, no protocol in the sleepy model rivals Bitcoin in its robustness to drastic fluctuations in participation levels, with state-of-the-art protocols making various restrictive assumptions. In this work, we present a new adversary model, called external adversary. Intuitively, in our model, corrupt nodes do not divulge information about their secret keys. In this model, we show that protocols in the sleepy model can meaningfully claim to remain secure against fully fluctuating participation, without compromising efficiency or corruption resilience. Our adversary model is quite natural, and arguably naturally captures the process via which malicious behavior arises in protocols, as opposed to traditional worst-case modeling. On top of which, the model is also theoretically appealing, circumventing a barrier established in a recent work of Malkhi, Momose, and Ren.</dc:description> 
+      <dc:date>2025-08-11T15:04:31Z</dc:date>
+      <dc:date>2026-08-15T01:25:52Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by-nc-nd/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2024/844</identifier> 
+   <datestamp>2026-08-14T08:28:32Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2024/844</dc:identifier>
+      <dc:title>Finding Dense Submodules with Algebraic Lattice Reduction</dc:title> 
+      <dc:creator>Alexander Karenin</dc:creator>
+      <dc:creator>Elena Kirshanova</dc:creator>
+      
+      <dc:subject>Attacks and cryptanalysis</dc:subject>
+      <dc:description>We prove an algebraic analogue of Pataki-Tural lemma (Pataki-Tural, arXiv:0804.4014, 2008) -- the main tool in analysing the so-called overstretched regime of NTRU.
+    Our result generalizes this lemma from Euclidean lattices to modules over any number field enabling us to look at NTRU as rank-2 module over cyclotomic number fields with a rank-1 dense submodule generated by the NTRU secret key. 
+    
+    For Euclidean lattices, this overstretched regime occurs for large moduli $q$ and enables to detect a dense sublattice in NTRU lattices leading to faster NTRU key recovery. We formulate an algebraic version of this event, the so-called Dense Submodule Discovery (DSD) event, and heuristically predict under which conditions this event happens. For that, we formulate an algebraic version of the Geometric Series Assumption -- an heuristic tool that describes the behaviour of algebraic lattice reduction algorithms. We verify this assumption by implementing an algebraic LLL -- an analog of classical LLL lattice reduction that operates on the module level. Our experiments verify the introduced heuristic, enabling us to predict the algebraic DSD event.
+
+UPD: minor notation fixes.</dc:description> 
+      <dc:date>2024-05-29T12:14:02Z</dc:date>
+      <dc:date>2026-08-14T08:28:32Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+
+</ListRecords>
+
+</OAI-PMH>

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Profile · Research Advisor{% endblock %}
+
+{% macro editor(content, label) %}
+  <form method="post" action="/profile/edit">
+    <textarea name="content" rows="18">{{ content }}</textarea>
+    <div class="actions"><button type="submit" class="primary">{{ label }}</button></div>
+  </form>
+{% endmacro %}
+
+{% macro steering_help() %}
+  <p class="hint">
+    Lines under <code>## More of</code> and <code>## Less of</code> are not description —
+    they are searched on. Each one is encoded by the same model that encodes the corpus,
+    so write them like paper titles ("doubly-efficient private information retrieval"),
+    not like sentences about yourself. Everything under the other headings is prose,
+    for you to read.
+  </p>
+{% endmacro %}
+
+{% block content %}
+<div class="page-head">
+  <h1>How the advisor sees you</h1>
+</div>
+
+<p class="status-line">
+  {% if profile %}
+    Last written by <strong>{{ profile.written_by }}</strong> on {{ profile.created_at[:10] }} ·
+  {% endif %}
+  <strong>{{ pending }}</strong> new rating{{ "" if pending == 1 else "s" }} since
+  it was written
+</p>
+
+{% if profile %}
+  {% if steer %}
+    <div class="card">
+      <p class="paper-meta">Steering your next batch</p>
+      <ul class="steer">
+        {% for item in steer.more %}<li class="more">more: {{ item }}</li>{% endfor %}
+        {% for item in steer.less %}<li class="less">less: {{ item }}</li>{% endfor %}
+      </ul>
+    </div>
+  {% else %}
+    <div class="card">
+      <p class="paper-meta">Not steering anything yet</p>
+      <p>This profile is all prose, so retrieval cannot act on it. Add a
+         <code>## More of</code> or <code>## Less of</code> section below and it will.</p>
+    </div>
+  {% endif %}
+
+  <div class="card profile-body">{{ profile.content }}</div>
+
+  <details class="edit">
+    <summary>Edit it yourself</summary>
+    <p class="hint">
+      You get the last word. Your edit is saved as a new version, not an overwrite.
+    </p>
+    {{ steering_help() }}
+    {{ editor(profile.content, "Save my version") }}
+  </details>
+
+  {% if history %}
+    <h2>Earlier versions</h2>
+    <ul class="cards">
+      {% for old in history %}
+        <li class="card">
+          <p class="paper-meta">{{ old.created_at[:16] }} · written by {{ old.written_by }}</p>
+          <details class="abstract">
+            <summary>{{ old.content[:160] }}…</summary>
+            <p>{{ old.content }}</p>
+          </details>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% else %}
+  <div class="empty">
+    <p>No profile yet. Write one below — the advisor will use it immediately, and it
+       does not need a library first.</p>
+  </div>
+
+  <details class="edit" open>
+    <summary>Write one</summary>
+    {{ steering_help() }}
+    {{ editor(starter, "Save profile") }}
+  </details>
+{% endif %}
+
+{% if brief %}
+  <details class="edit">
+    <summary>Have an assistant write it</summary>
+    <p class="hint">
+      The advisor never calls a model and holds no API key. If you would rather not
+      write the profile yourself, copy the text below into whatever assistant you
+      already have — Claude on the web, say — and paste its answer into the editor
+      above. Nothing leaves this machine unless you carry it there.
+    </p>
+    <textarea rows="14" readonly onclick="this.select()">{{ brief }}</textarea>
+  </details>
+{% endif %}
+
+{% if notes %}
+  <h2>Things you said</h2>
+  <p class="hint">
+    Retrieval cannot read a note, but it can read a line you lift out of one into
+    <code>## More of</code> or <code>## Less of</code>.
+  </p>
+  <ul class="cards">
+    {% for note in notes %}
+      <li class="card">
+        <p>“{{ note.note }}”</p>
+        <p class="paper-meta">
+          on {{ note.title }} · {{ "liked" if note.rating > 0 else "rejected" }}
+        </p>
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}

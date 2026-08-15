@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Feed · Research Advisor{% endblock %}
+
+{% block content %}
+<div class="page-head">
+  <h1>Feed</h1>
+  {% if embedded %}
+    <form method="post" action="/recommend">
+      <button type="submit" class="primary">Get new recommendations</button>
+    </form>
+  {% endif %}
+</div>
+
+<p class="status-line">
+  <strong>{{ library_size }}</strong> in your library ·
+  <strong>{{ corpus_size }}</strong> papers harvested ·
+  <strong>{{ embedded }}</strong> embedded
+</p>
+
+{% if recommendations %}
+  <ul class="cards">
+    {% for rec in recommendations %}
+      {% set paper = rec.paper %}
+      <li class="card">
+        {% if rec.rationale %}
+          <p class="rationale">{{ rec.rationale }}</p>
+        {% endif %}
+
+        {% include "_paper.html" %}
+
+        <div class="actions">
+          <form method="post" action="/feed/{{ rec.rec_id }}/liked">
+            <button type="submit" title="More like this">&#128077; Interesting</button>
+          </form>
+          <button type="button" title="Less like this"
+                  hx-get="/feed/{{ rec.rec_id }}/why"
+                  hx-target="#why-{{ rec.rec_id }}" hx-swap="innerHTML">
+            &#128078; Not for me
+          </button>
+          <form method="post" action="/feed/{{ rec.rec_id }}/queued">
+            <button type="submit">Read later</button>
+          </form>
+          <form method="post" action="/feed/{{ rec.rec_id }}/dismissed">
+            <button type="submit" class="muted">Dismiss</button>
+          </form>
+          {% if rec.score is not none %}
+            <span class="score" title="cosine similarity to your interests">{{ "%.3f"|format(rec.score) }}</span>
+          {% endif %}
+        </div>
+        <div id="why-{{ rec.rec_id }}"></div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="empty">
+    <p>No recommendations yet.</p>
+    {% if library_size == 0 %}
+      <p>Start by telling the advisor what you have already read —
+         <a href="/add">paste some arXiv or ePrint IDs</a>. Ten or so is enough to work with.</p>
+    {% elif corpus_size == 0 %}
+      <p>Your library is seeded. Next, harvest the corpus to recommend from:</p>
+      <pre><code>advisor harvest</code></pre>
+    {% elif embedded == 0 %}
+      <p>The corpus is harvested. Next, embed it:</p>
+      <pre><code>pip install -e '.[embed]' &amp;&amp; advisor embed</code></pre>
+    {% elif library_embedded == 0 %}
+      <p>Your {{ library_size }} paper{{ '' if library_size == 1 else 's' }}
+         {{ 'has' if library_size == 1 else 'have' }} not been encoded yet, and your
+         interests are built from them — so there is nothing to match against.</p>
+      <p>The embed pass takes your library first, so this clears within a minute or
+         two of it running. If it is not running, start it:</p>
+      <pre><code>advisor embed</code></pre>
+    {% else %}
+      <p>Everything is in place — generate a batch.</p>
+      <form method="post" action="/recommend">
+        <button type="submit" class="primary">Get recommendations</button>
+      </form>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Research Advisor{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/htmx.min.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">Research Advisor</a>
+    <nav>
+      <a href="/">Feed</a>
+      <a href="/library">Library</a>
+      <a href="/add">Add</a>
+      <a href="/profile">Profile</a>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    Paper metadata from the
+    <a href="https://arxiv.org">arXiv API</a> and the
+    <a href="https://eprint.iacr.org">Cryptology ePrint Archive</a>
+    (© IACR and the respective authors), and
+    <a href="https://www.crossref.org">Crossref</a>.
+  </footer>
+</body>
+</html>

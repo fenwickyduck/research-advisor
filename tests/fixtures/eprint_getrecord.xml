@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<?xml-stylesheet type="text/xsl" href="/css/oai2.xsl" ?>
+<OAI-PMH xmlns="http://www.openarchives.org/OAI/2.0/" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/
+         http://www.openarchives.org/OAI/2.0/OAI-PMH.xsd">
+  <responseDate>2026-08-15T15:38:28Z</responseDate>
+  
+<request verb="GetRecord" identifier="oai:eprint.iacr.org:2026/1688"
+         metadataPrefix="oai_dc">http://arXiv.org/oai2</request>
+<GetRecord>
+
+<record> 
+ <header>
+   <identifier>oai:eprint.iacr.org:2026/1688</identifier> 
+   <datestamp>2026-08-14T09:57:08Z</datestamp>
+ </header>
+ 
+ <metadata>
+    <oai_dc:dc 
+        xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/" 
+        xmlns:dc="http://purl.org/dc/elements/1.1/" 
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+        xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/ 
+                            http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
+      <dc:identifier>https://eprint.iacr.org/2026/1688</dc:identifier>
+      <dc:title>Hell’s Bells: A Neural Network Pipeline for Ternary Fast Matrix Multiplication Algorithms</dc:title> 
+      <dc:creator>Erik Mårtensson</dc:creator>
+      <dc:creator>Paul Stankovski Wagner</dc:creator>
+      <dc:creator>Joshua Stapleton</dc:creator>
+      
+      <dc:subject>Foundations</dc:subject>
+      <dc:description>We present a neural network-based pipeline for efficiently generating fast matrix multiplication (FMM) algorithms of small but arbitrary dimensions $(n,m,k)$. Our neural network is general and tunable to output FMM schemes with specific properties, and in this paper we specifically target aspects that are useful and important in practical implementation, such as ternarity (coefficients in $\{-1, 0, 1\}$), sparseness and a low number of additions after optimization (addition reduction carried out separately).
+
+We generate and optimize thousands of FMM algorithms and show that our generation method is beneficial in terms of performance across the entire FMM pipeline (both the FMM generation itself and optimization of additions).
+We discuss performance metrics and utilize heatmaps to visualize and understand this performance.
+
+We achieve record-low arithmetic (additive) complexity for various combinations of dimensions. For $(n,m,k) = (2,2,k)$, our method performs particularly well. Our improvement compared to previous results increases with $k$.
+
+We show that the (addition) optimization process can behave very differently depending on the dimensions considered, indicating how further improvements (beyond our results) can be targeted.
+In particular, in the $(n,m,k) = (2,2,k)$ setting, we show evidence of structural FMM properties coming into play, concretely showing that FMM generation with a minimal number of additions is sometimes suboptimal with respect to the entire FMM pipeline.
+
+Finally, we make our neural network implementation, our generated FMM schemes, heatmap utilities and datasets publicly available.</dc:description> 
+      <dc:date>2026-08-14T09:57:08Z</dc:date>
+      <dc:date>2026-08-14T09:57:08Z</dc:date>
+      <dc:rights>https://creativecommons.org/licenses/by/4.0/</dc:rights>
+      <dc:publisher>International Association for Cryptologic Research (IACR)</dc:publisher>
+      <dc:type>e-print</dc:type>
+      <dc:language>en</dc:language>
+      
+    </oai_dc:dc>
+ </metadata>
+</record>
+</GetRecord>
+
+</OAI-PMH>

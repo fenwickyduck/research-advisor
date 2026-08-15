@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Library · Research Advisor{% endblock %}
+
+{% block content %}
+<h1>Library</h1>
+
+<nav class="filters">
+  <a href="/library" class="{{ 'active' if not active_status }}">
+    All ({{ counts.values() | sum }})</a>
+  {% for name in ["read", "queued", "skipped"] %}
+    <a href="/library?status={{ name }}" class="{{ 'active' if active_status == name }}">
+      {{ name }} ({{ counts.get(name, 0) }})</a>
+  {% endfor %}
+</nav>
+
+{% if entries %}
+  <ul class="cards">
+    {% for entry in entries %}
+      {% set paper = entry.paper %}
+      <li class="card">
+        <div class="card-head">
+          <span class="badge badge-{{ entry.status }}">{{ entry.status }}</span>
+          {% if entry.rating == 1 %}<span class="badge badge-up">liked</span>
+          {% elif entry.rating == -1 %}<span class="badge badge-down">disliked</span>{% endif %}
+        </div>
+
+        {% include "_paper.html" %}
+
+        <div class="actions">
+          <form method="post" action="/library/{{ paper.id }}/rate">
+            <input type="hidden" name="rating" value="1">
+            <button type="submit" title="Liked this">&#128077;</button>
+          </form>
+          <form method="post" action="/library/{{ paper.id }}/rate">
+            <input type="hidden" name="rating" value="-1">
+            <button type="submit" title="Not for me">&#128078;</button>
+          </form>
+          <form method="post" action="/library/{{ paper.id }}/status">
+            <select name="status" onchange="this.form.submit()">
+              {% for name in ["read", "queued", "skipped"] %}
+                <option value="{{ name }}" {{ "selected" if entry.status == name }}>{{ name }}</option>
+              {% endfor %}
+            </select>
+          </form>
+          <form method="post" action="/library/{{ paper.id }}/remove">
+            <button type="submit" class="danger" title="Remove from library">Remove</button>
+          </form>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="empty">
+    <p>Nothing here yet. <a href="/add">Add the papers you have read</a>.</p>
+  </div>
+{% endif %}
+{% endblock %}

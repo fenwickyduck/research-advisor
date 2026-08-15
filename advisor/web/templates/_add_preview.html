@@ -1,0 +1,44 @@
+{# HTMX fragment: what the pasted IDs resolved to, awaiting confirmation. #}
+{% set found = resolved | selectattr("paper") | list %}
+
+{% if unparsed %}
+  <div class="warn">
+    <strong>Could not read {{ unparsed | length }} line(s):</strong>
+    <ul>{% for line in unparsed %}<li><code>{{ line }}</code></li>{% endfor %}</ul>
+  </div>
+{% endif %}
+
+{% if resolved %}
+  <h2>Resolved {{ found | length }} of {{ resolved | length }}</h2>
+
+  <ul class="cards">
+    {% for item in resolved %}
+      <li class="card {{ 'card-error' if not item.paper }}">
+        {% if item.paper %}
+          {% set paper = item.paper %}
+          {% if item.already %}<span class="badge">already in library</span>{% endif %}
+          {% include "_paper.html" %}
+        {% else %}
+          <p><code>{{ item.ref }}</code> —
+            {% if item.error %}lookup failed: {{ item.error }}
+            {% else %}not found at the source{% endif %}
+          </p>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if found %}
+    <form method="post" action="/add/commit" class="commit">
+      <input type="hidden" name="ids" value="{{ raw_ids }}">
+      <label>Add as
+        <select name="status">
+          <option value="read">read</option>
+          <option value="queued">queued</option>
+          <option value="skipped">skipped</option>
+        </select>
+      </label>
+      <button type="submit">Add {{ found | length }} to library</button>
+    </form>
+  {% endif %}
+{% endif %}

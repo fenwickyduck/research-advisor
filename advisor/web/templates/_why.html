@@ -1,0 +1,24 @@
+{# Revealed by a thumbs-down: optional reasons, and the free-text note that
+   carries the most signal. Submitting with nothing selected is a plain -1. #}
+<form method="post" action="/feed/{{ rec_id }}/disliked" class="why">
+  <p class="why-head">Not for me because… <span class="why-optional">(optional)</span></p>
+
+  <div class="chips">
+    {% for reason in reasons %}
+      <label class="chip">
+        <input type="checkbox" name="tags" value="{{ reason.key }}">
+        <span>{{ reason.label }}</span>
+      </label>
+    {% endfor %}
+  </div>
+
+  <input type="text" name="note" class="note"
+         placeholder="Anything else? e.g. “I want attacks, not surveys”" autofocus>
+
+  <div class="actions">
+    <button type="submit" class="primary">Save</button>
+    <button type="submit" formaction="/feed/{{ rec_id }}/dismissed" class="muted">
+      Just dismiss
+    </button>
+  </div>
+</form>

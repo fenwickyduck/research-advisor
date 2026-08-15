@@ -1,0 +1,300 @@
+/* One stylesheet, no framework. Light and dark both defined explicitly so the
+   page never borrows an unstyled background from the browser. */
+
+:root {
+  --bg: #fbfaf8;
+  --surface: #ffffff;
+  --border: #e2ded6;
+  --text: #1c1a17;
+  --muted: #6b665e;
+  --accent: #7a4a2b;
+  --accent-soft: #f3ece5;
+  --danger: #9a3412;
+  --up: #2f6b3f;
+  --down: #9a3412;
+  --radius: 8px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #171614;
+    --surface: #1f1e1b;
+    --border: #35322d;
+    --text: #eae7e1;
+    --muted: #9b958a;
+    --accent: #d8a077;
+    --accent-soft: #2a2621;
+    --danger: #e0795a;
+    --up: #7fc48f;
+    --down: #e0795a;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #171614;
+  --surface: #1f1e1b;
+  --border: #35322d;
+  --text: #eae7e1;
+  --muted: #9b958a;
+  --accent: #d8a077;
+  --accent-soft: #2a2621;
+  --danger: #e0795a;
+  --up: #7fc48f;
+  --down: #e0795a;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.55 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code, pre {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+pre {
+  background: var(--accent-soft);
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+
+/* --- chrome --- */
+
+.topbar {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.brand { font-weight: 650; color: var(--text); }
+.topbar nav { display: flex; gap: 1.1rem; }
+
+main { max-width: 52rem; margin: 0 auto; padding: 1.75rem 1.5rem 4rem; }
+
+h1 { font-size: 1.5rem; margin: 0 0 1rem; }
+h2 { font-size: 1.15rem; margin: 1.75rem 0 0.75rem; }
+
+footer {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+/* --- lists of papers --- */
+
+.cards { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.9rem; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+}
+.card-error { border-color: var(--danger); }
+.card-head { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; }
+
+.rationale {
+  margin: 0 0 0.75rem;
+  padding: 0.55rem 0.8rem;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.93rem;
+}
+
+.paper-title { font-size: 1.02rem; margin: 0 0 0.35rem; line-height: 1.35; }
+.paper-title a { color: var(--text); }
+
+.paper-meta, .paper-links {
+  margin: 0.3rem 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+.dot { opacity: 0.5; }
+
+.abstract { margin: 0.6rem 0; font-size: 0.9rem; }
+.abstract summary { cursor: pointer; color: var(--muted); }
+.abstract summary::marker { color: var(--accent); }
+.abstract p { margin: 0.6rem 0 0; white-space: pre-wrap; }
+
+.ident { font-family: ui-monospace, monospace; }
+.tag {
+  padding: 0.1rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.76rem;
+}
+
+.badge {
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.74rem;
+  background: var(--accent-soft);
+  color: var(--muted);
+}
+.badge-read { color: var(--up); }
+.badge-up { color: var(--up); }
+.badge-down { color: var(--down); }
+
+/* --- controls --- */
+
+.actions { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-top: 0.8rem; }
+.actions form { margin: 0; }
+
+button, select {
+  font: inherit;
+  font-size: 0.87rem;
+  padding: 0.32rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button.danger { color: var(--danger); }
+
+textarea {
+  width: 100%;
+  font-family: ui-monospace, monospace;
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  resize: vertical;
+}
+
+.filters { display: flex; gap: 1rem; margin-bottom: 1.25rem; font-size: 0.9rem; }
+.filters a { color: var(--muted); }
+.filters a.active { color: var(--accent); font-weight: 600; }
+
+.commit {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+/* --- states --- */
+
+.status-line { color: var(--muted); font-size: 0.88rem; margin-bottom: 1.5rem; }
+.hint { color: var(--muted); font-size: 0.9rem; }
+
+.empty {
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  text-align: center;
+  color: var(--muted);
+}
+.empty pre { text-align: left; display: inline-block; }
+
+.warn {
+  border: 1px solid var(--danger);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+.warn ul { margin: 0.4rem 0 0; }
+
+.htmx-indicator { opacity: 0; color: var(--muted); font-size: 0.85rem; }
+.htmx-request .htmx-indicator, .htmx-request.htmx-indicator { opacity: 1; }
+
+.page-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.page-head h1 { margin-bottom: 0; }
+
+button.primary { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+button.primary:hover { opacity: 0.9; }
+button.muted { color: var(--muted); }
+
+.score {
+  margin-left: auto;
+  font-family: ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+/* --- feedback reasons --- */
+
+.why {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed var(--border);
+}
+.why-head { margin: 0 0 0.6rem; font-size: 0.88rem; }
+.why-optional { color: var(--muted); font-weight: 400; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.7rem; }
+.chip { cursor: pointer; }
+.chip input { position: absolute; opacity: 0; width: 0; height: 0; }
+.chip span {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.chip input:checked + span {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 550;
+}
+.chip input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.note {
+  width: 100%;
+  font: inherit;
+  font-size: 0.87rem;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text);
+}
+
+.profile-body { white-space: pre-wrap; line-height: 1.6; }
+.profile-body h2 { font-size: 1rem; margin: 1rem 0 0.3rem; }
+.edit { margin: 1.25rem 0; }
+.edit summary { cursor: pointer; color: var(--accent); font-size: 0.9rem; }
+.edit textarea { margin-top: 0.6rem; }
+
+.steer { list-style: none; margin: 0.4rem 0 0; padding: 0; }
+.steer li {
+  display: inline-block;
+  margin: 0.2rem 0.3rem 0.2rem 0;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius);
+  font-size: 0.85rem;
+  border: 1px solid var(--border);
+}
+/* The direction has to be readable without relying on colour alone, hence the
+   "more:"/"less:" prefix in the markup. */
+.steer .more { border-color: var(--accent); }
+.steer .less { opacity: 0.75; text-decoration: line-through; }

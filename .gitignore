@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# Local data, should it ever be pointed at the repo instead of ~/.local/share.
+*.db
+*.db-wal
+*.db-shm
+vectors.npy
