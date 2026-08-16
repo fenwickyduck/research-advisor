@@ -35,7 +35,7 @@ on one result, excludes anything you have already seen, and adds new work by
 authors you follow. Each recommendation is labelled with the reason it was
 chosen — the paper of yours it is nearest to, or the author you follow.
 
-There is no language model anywhere in that loop, which is why it costs nothing
+No language model appears anywhere in that loop, which is why it costs nothing
 to run and why your reading never leaves the machine.
 
 ## Setup
@@ -56,37 +56,38 @@ re-run; every step checks whether it is already done.
 Then:
 
 ```sh
-source .venv/bin/activate          # once per terminal
-advisor add 2401.12345 2024/123    # papers you have read — ten is plenty
-advisor serve                      # http://127.0.0.1:8000
+source .venv/bin/activate
+advisor serve
 ```
 
-**Activating the virtualenv is what puts `advisor` on your `PATH`.** Without it
-you get `command not found`, because the command lives in `.venv/bin/`. If you
-would rather not activate anything, every command also works spelled out —
-`.venv/bin/advisor status`. That is the form for scripts and cron, which have no
-shell to activate in; `advisor schedule` and `advisor mcp --config` already print
-absolute paths for that reason.
+and open <http://127.0.0.1:8000>. Add a few papers you have read on the **Add**
+page — ten is plenty — and press *Get new recommendations*.
+
+`source .venv/bin/activate` is what puts `advisor` on your `PATH`, once per
+terminal; without it you get `command not found`. Everything also works spelled
+out as `.venv/bin/advisor`, which is the form for scripts and cron.
 
 ### Doing it by hand
 
-If you would rather not run a script, or you want to build the corpus yourself
-instead of trusting a prebuilt file:
+If you would rather not run a script, or want to build the corpus yourself
+rather than trust a prebuilt file:
 
 ```sh
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -e '.[all]'
 
-advisor snapshot fetch             # download the shared corpus (~151 MB), or:
-advisor harvest                    # build it yourself — tens of minutes
-advisor embed                      # ~3 hours on a laptop CPU
+advisor snapshot fetch     # the shared corpus, ~151 MB — or build your own:
+advisor harvest            # tens of minutes
+advisor embed              # ~3 hours on a laptop CPU
 ```
 
-You do not have to wait for `advisor embed` to finish. It encodes your own
-library first and then spreads across years, so recommendations start working
-within a couple of minutes and simply get better. Stop and rerun it whenever —
-it resumes where it left off.
+`advisor embed` need not finish before you start. It encodes your own library
+first and then spreads across years, so recommendations work within a couple of
+minutes and simply get better. It resumes where it left off.
+
+On Windows, run `install.sh` under WSL or Git Bash, or do the above in
+PowerShell with `.venv\Scripts\activate` instead.
 
 ## Commands
 
@@ -118,7 +119,7 @@ Everything is `advisor <command>`; add `--help` to any of them.
 | `advisor profile` | Show your interest profile. `--brief` prints your reading and ratings with instructions, to hand to an assistant of your choosing. |
 | `advisor follow <name>` | Follow an author; their new work appears whatever it is about. Refuses a name nobody in your corpus wrote, and suggests near matches. No arguments lists who you follow; `--suggest` names authors you have read more than once. |
 | `advisor unfollow <name>` | Stop following someone. |
-| `advisor mcp` | Serve your library to an assistant over MCP. `--config` prints the setup command. |
+| `advisor mcp` | Speak MCP on stdin/stdout so an AI assistant can consult your library. Not run by hand — your assistant launches it. `--config` prints the setup command. |
 
 ### Housekeeping
 
@@ -204,26 +205,82 @@ implementation — turned one followed author into four on a corpus this size.
 
 ### Talking to an assistant about it
 
-`advisor mcp` serves your library, the corpus and your profile over the Model
-Context Protocol, so an assistant you already run can consult them. **The
-direction is the opposite of the usual integration: the advisor never calls a
-model.** It answers questions, holds no credential, and speaks over a pipe to a
-client that launches it, so nothing listens on a port.
+You can point an AI assistant at your library and discuss it — *"what have I
+been reading?"*, *"I want to move toward verifiable computation, what would that
+mean?"* — and have it write your profile for you. This uses the **Model Context
+Protocol** (MCP), an open standard for letting an assistant call into programs
+on your own machine.
 
-On Linux the client is **Claude Code**, a CLI (Claude Desktop is macOS and
-Windows only):
+**The direction is the opposite of what you might expect.** The advisor never
+calls an AI, holds no API key, and costs nothing. It *answers* questions. The
+assistant you already pay for does the thinking and calls the advisor for facts.
+
+#### What `advisor mcp` does
+
+It starts a server that speaks MCP on standard input and output.
+
+**You never run it yourself.** There is nothing to look at and no address to
+visit — it would just sit there waiting. Instead you tell your assistant the
+command, and the assistant launches it in the background whenever it needs your
+library. Nothing listens on a network port; nothing is exposed.
+
+So the setup is: *tell your assistant this command exists*, once.
+
+#### Setting it up
+
+First get the exact command for your machine:
 
 ```sh
-claude mcp add research-advisor -- "$PWD/.venv/bin/advisor" mcp
-claude mcp list          # should say ✔ Connected
-claude                   # then ask "what have I been reading?"
+source .venv/bin/activate
+advisor mcp --config
 ```
 
-`advisor mcp --config` prints that with the right absolute path, plus the JSON
-form for other clients. MCP servers load at startup, so an already-open session
-will not see it.
+That prints the absolute path to your install, which is what every client below
+needs. Then pick your assistant.
 
-Three prompts, appearing as slash commands:
+**Claude Code** — the terminal tool. Works on Linux, macOS and Windows:
+
+```sh
+claude mcp add research-advisor -- /full/path/to/.venv/bin/advisor mcp
+claude mcp list      # should print: ✔ Connected
+```
+
+**Claude Desktop** — the app, on macOS and Windows only. Edit its config file:
+
+| | |
+|---|---|
+| macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
+
+and add the `research-advisor` entry inside `mcpServers`, keeping any that are
+already there:
+
+```json
+{
+  "mcpServers": {
+    "research-advisor": {
+      "command": "/full/path/to/.venv/bin/advisor",
+      "args": ["mcp"]
+    }
+  }
+}
+```
+
+On Windows the path is `C:\\Users\\you\\research-advisor\\.venv\\Scripts\\advisor.exe`
+— note that JSON needs each backslash doubled.
+
+**Either way, restart the assistant afterwards.** MCP servers are launched when
+it starts, so an already-open session will not see a newly added one.
+
+#### Using it
+
+Just talk. There is no syntax:
+
+> *What have I been reading lately?*
+> *I keep skipping the deployment papers — what should I put in my profile?*
+> *Find me work on succinct arguments and steer my profile toward it.*
+
+Three **prompts** also appear as slash commands:
 
 | | |
 |---|---|
@@ -231,15 +288,19 @@ Three prompts, appearing as slash commands:
 | `/explore <topic>` | work out what a direction is really called, then steer toward it |
 | `/review_feed` | go through the current batch and say which of it is noise |
 
-They are not templates — each reads the database first and arrives carrying the
-evidence, and `/explore` searches the corpus before asking anything, so the
-discussion starts from real titles rather than your guess at the vocabulary.
-Of the twelve tools, nine are read-only; the three that write are the profile
-and following, each annotated so the client asks first. Nothing can delete a
-paper or reset the database.
+They arrive carrying the evidence rather than fetching it — `/explore` searches
+the corpus before asking anything, so the discussion starts from real titles
+rather than your guess at the vocabulary.
 
-If you would rather not set that up, `advisor profile --brief` prints the same
-evidence and instructions as text, to paste into whatever assistant you like.
+Of the twelve **tools**, nine only read. The three that write are the profile
+and following, each marked so the assistant asks you first. None can delete a
+paper, clear your library or reset the database.
+
+#### If you would rather not
+
+`advisor profile --brief` prints your reading, ratings and notes with
+instructions for writing a profile from them. Paste that into any assistant,
+paste the answer back at `/profile`. Same result, nothing to install.
 
 ### Why every recommendation comes with a reason
 
@@ -271,11 +332,11 @@ sounds:
   stops being recommended — but the row survives, because a paper already in
   your library should not vanish from your history.
 
-Merging follows two rules. A record arriving again **from the same source** is
-authoritative and replaces the stored content. A record matched **across
-sources** (same title and an overlapping author) fills in gaps and adds its
-identifier, but never overwrites a fuller record with a terser one — and
-category lists always union, so a paper on both archives keeps both taxonomies.
+Merging follows two rules. A record arriving again **from the same source**
+replaces the stored content. One matched **across sources** (same title, an
+overlapping author) fills gaps and adds its identifier but never overwrites a
+fuller record with a terser one, and category lists always union, so a paper on
+both archives keeps both taxonomies.
 
 ## Your data, and sharing this
 
@@ -288,30 +349,27 @@ advisor export mine.json     # take it to another machine, or keep as a backup
 advisor import mine.json     # merges by default
 ```
 
-The same pair is at `/data` in the browser. Paper ids are local numbers, so an
-export carries each remembered paper's real identifiers *and* enough metadata to
-recreate it — an import works against an empty database, before anything has
-been harvested. It also carries which papers you have already been shown, so a
-move does not re-offer everything you looked at once and passed over.
-Importing twice changes nothing.
+The same pair is at `/data` in the browser. Paper ids are local numbers, so the
+file carries each paper's real identifiers and enough metadata to recreate it —
+an import works against an empty database, before anything has been harvested.
+It also records which papers you have already been shown, so a move does not
+re-offer everything you passed over. Importing twice changes nothing.
 
 The corpus travels separately, with `advisor snapshot`, because it is the
-opposite kind of thing: large, public, identical for everyone, and expensive to
-rebuild.
+opposite kind of thing: large, public, identical for everyone, expensive to
+rebuild — and it contains nothing personal, which the tests assert.
 
 ```sh
 advisor snapshot save corpus.tar    # ~151 MB, about 5 seconds
 advisor snapshot load corpus.tar    # about 15 seconds, versus 3 hours of encoding
 ```
 
-Vectors ship as float16, which halves 223 MB to 112 MB: they are unit vectors,
-and against the float32 originals the top-10 and top-50 neighbours come back
-identical, with a largest cosine error of 3e-5. The metadata is gzipped JSON
-Lines, 134 MB down to 42 MB. The result is too big for a file in a git
-repository (100 MB limit) and belongs in a **release asset** (2 GB limit)
-anyway, being a build artifact rather than source.
-
-A snapshot contains no library, ratings, notes or profile — the tests assert it.
+Vectors ship as float16, halving 223 MB to 112 MB with no measurable loss: they
+are unit vectors, and against the float32 originals the top-10 and top-50
+neighbours come back identical. Gzipped JSON Lines takes the metadata from
+134 MB to 42 MB. The result is too large for a file in a git repository
+(100 MB limit) and belongs in a release asset (2 GB) anyway, being a build
+artifact rather than source.
 
 ## Running unattended
 

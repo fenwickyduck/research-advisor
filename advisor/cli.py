@@ -403,8 +403,8 @@ def _mcp(args: argparse.Namespace) -> int:
 
         command = executable()
         print(
-            "Claude Code (a CLI, works on Linux — this is almost certainly the\n"
-            "one you want) registers the server for you:\n\n"
+            "Claude Code (the terminal tool; Linux, macOS and Windows)\n"
+            "registers the server for you:\n\n"
             f"  claude mcp add research-advisor -- {command} mcp\n\n"
             "  Add --scope user to make it available in every directory rather\n"
             "  than only this project. Then start a new 'claude' session — MCP\n"
@@ -412,8 +412,8 @@ def _mcp(args: argparse.Namespace) -> int:
             "  Check it with 'claude mcp list'.\n"
         )
         print(
-            "Any other MCP client takes the same server as JSON — Claude Desktop\n"
-            "(macOS and Windows only) keeps it in claude_desktop_config.json:\n"
+            "Claude Desktop (macOS and Windows) and other clients take the same\n"
+            "server as JSON, in claude_desktop_config.json:\n"
         )
         print(mcp_server.client_config(str(command)))
         print(
