@@ -342,9 +342,14 @@ def followed_authors() -> dict[str, Any]:
 def follow_author(name: str) -> dict[str, Any]:
     conn = _conn()
     try:
-        if author_store.follow(conn, name):
-            return {"followed": name}
-        return {"followed": None, "reason": "already followed, or not a usable name"}
+        result = author_store.follow(conn, name)
+        if result:
+            return {"followed": name, "papers_in_corpus": result.papers}
+        return {
+            "followed": None,
+            "reason": result.reason,
+            "did_you_mean": list(result.suggestions),
+        }
     finally:
         conn.close()
 

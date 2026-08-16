@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import sqlite3
 import unicodedata
+from dataclasses import dataclass
 
 from advisor.db import json_list
 from advisor.models import now
@@ -81,22 +82,87 @@ def matches(followed: str, candidate: str) -> bool:
     return followed_given == candidate_given
 
 
-def follow(conn: sqlite3.Connection, name: str) -> bool:
-    """Start following ``name``. False if already followed, or unusable.
+@dataclass
+class Followed:
+    """The outcome of trying to follow someone, and why."""
+
+    added: bool
+    reason: str = ""
+    papers: int = 0
+    suggestions: tuple[str, ...] = ()
+
+    def __bool__(self) -> bool:
+        return self.added
+
+
+def written_by(conn: sqlite3.Connection, name: str, limit: int = 500) -> int:
+    """How many papers in the corpus this name matches."""
+    author_key = key(name)
+    if not author_key:
+        return 0
+
+    surname = author_key.partition("|")[0]
+    rows = conn.execute(
+        "SELECT authors FROM papers WHERE lower(authors) LIKE ? LIMIT ?",
+        (f"%{surname}%", limit),
+    ).fetchall()
+    return sum(
+        any(matches(author_key, key(who)) for who in json_list(row["authors"]))
+        for row in rows
+    )
+
+
+def near(conn: sqlite3.Connection, name: str, limit: int = 5) -> tuple[str, ...]:
+    """Real author names sharing this one's surname — for when it was a typo."""
+    surname = key(name).partition("|")[0]
+    if not surname:
+        return ()
+
+    found: dict[str, str] = {}
+    for row in conn.execute(
+        "SELECT authors FROM papers WHERE lower(authors) LIKE ? LIMIT 400",
+        (f"%{surname}%",),
+    ):
+        for who in json_list(row["authors"]):
+            candidate = key(who)
+            if candidate.partition("|")[0] == surname:
+                found.setdefault(candidate, who)
+    return tuple(sorted(found.values()))[:limit]
+
+
+def follow(conn: sqlite3.Connection, name: str) -> Followed:
+    """Start following ``name``, if it is a person the corpus has heard of.
+
+    A name nobody in 76,000 papers wrote is a typo or a slip, and following it
+    fails silently forever — the feed simply never changes. Better to say so at
+    the point of asking. The check is skipped when the corpus is empty, since
+    then it would refuse everyone.
 
     "Already followed" uses :func:`matches`, not key equality: following
-    "Wei Chen" and then "W. Chen" is one person asked for twice, and
-    storing both would report their papers twice.
+    "Wei Chen" and then "W. Chen" is one person asked for twice, and storing
+    both would report their papers twice.
     """
     author_key = key(name)
-    if not author_key or is_followed(conn, name):
-        return False
+    if not author_key:
+        return Followed(False, "that is not a usable name")
+    if is_followed(conn, name):
+        return Followed(False, "already following them")
+
+    corpus = conn.execute("SELECT count(*) FROM papers").fetchone()[0]
+    papers = written_by(conn, name) if corpus else 0
+    if corpus and not papers:
+        return Followed(
+            False,
+            f"nobody of that name wrote any of the {corpus} papers you have "
+            f"harvested — check the spelling, or harvest more first",
+            suggestions=near(conn, name),
+        )
 
     conn.execute(
         "INSERT INTO followed_authors (key, name, added_at) VALUES (?,?,?)",
         (author_key, name.strip(), now()),
     )
-    return True
+    return Followed(True, papers=papers)
 
 
 def unfollow(conn: sqlite3.Connection, name: str) -> bool:

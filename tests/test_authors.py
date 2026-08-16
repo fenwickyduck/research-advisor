@@ -192,3 +192,53 @@ def test_followed_picks_lead_the_batch_and_are_labelled(tmp_path, conn) -> None:
 
     assert [c.via for c in batch[:2]] == ["Wei Chen", "Wei Chen"]
     assert all(c.via is None for c in batch[2:]), "similarity picks carry no author"
+
+
+# ------------------------------------------------------- following a real person
+
+
+def test_following_a_name_nobody_wrote_is_refused(conn: sqlite3.Connection) -> None:
+    """A typo follows silently forever: the feed just never changes."""
+    add(conn, "Real Paper", ["Wei Chen"])
+
+    result = authors.follow(conn, "fdsa fdsa")
+
+    assert not result
+    assert "nobody of that name" in result.reason
+    assert authors.following(conn) == []
+
+
+def test_a_misspelled_given_name_suggests_the_real_one(conn: sqlite3.Connection) -> None:
+    add(conn, "Real Paper", ["Wei Chen"])
+    add(conn, "Another", ["Wen Chen"])
+
+    result = authors.follow(conn, "Xyzzy Chen")
+
+    assert not result
+    assert set(result.suggestions) == {"Wei Chen", "Wen Chen"}
+
+
+def test_following_reports_how_much_they_wrote(conn: sqlite3.Connection) -> None:
+    for i in range(3):
+        add(conn, f"Paper {i}", ["Wei Chen"])
+    add(conn, "Not theirs", ["Someone Else"])
+
+    result = authors.follow(conn, "Wei Chen")
+
+    assert result and result.papers == 3
+
+
+def test_an_empty_corpus_cannot_vouch_for_anyone(conn: sqlite3.Connection) -> None:
+    """Checking against nothing would refuse everyone on a fresh install."""
+    result = authors.follow(conn, "Wei Chen")
+
+    assert result
+    assert authors.following(conn)[0]["name"] == "Wei Chen"
+
+
+def test_written_by_counts_only_that_person(conn: sqlite3.Connection) -> None:
+    add(conn, "A", ["Wei Chen"])
+    add(conn, "B", ["W. Chen"])
+    add(conn, "C", ["Wen Chen"])
+
+    assert authors.written_by(conn, "Wei Chen") == 2

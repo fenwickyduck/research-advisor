@@ -9,6 +9,10 @@
   it does not have to resemble anything you have read.
 </p>
 
+{% if problem %}
+  <div class="warn"><p style="margin:0">{{ problem }}</p></div>
+{% endif %}
+
 <form method="post" action="/authors/follow" class="searchbar">
   <input type="text" name="name" aria-label="Author name">
   <button type="submit" class="primary">Follow</button>

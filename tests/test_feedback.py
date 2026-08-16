@@ -201,3 +201,40 @@ def test_rating_the_same_paper_twice_counts_once(conn: sqlite3.Connection) -> No
 
     assert conn.execute("SELECT count(*) FROM feedback").fetchone()[0] == 5
     assert profile.feedback_since_last_profile(conn) == 2
+
+
+def test_rated_papers_counts_opinions_not_clicks(conn: sqlite3.Connection) -> None:
+    """Anything shown to a person as "ratings" must count papers, not rows.
+
+    This has now been got wrong twice — on the profile page and on /data — so
+    the count lives in one function and is asserted here.
+    """
+    from advisor.models import Paper, upsert_paper
+
+    first = upsert_paper(conn, Paper(title="A", authors=["A"], arxiv_id="r.1"))
+    second = upsert_paper(conn, Paper(title="B", authors=["B"], arxiv_id="r.2"))
+
+    for _ in range(5):
+        feedback.record(conn, first, 1)
+    feedback.record(conn, first, -1)   # changed your mind: still one paper
+    feedback.record(conn, second, 1)
+
+    assert conn.execute("SELECT count(*) FROM feedback").fetchone()[0] == 7
+    assert feedback.rated_papers(conn) == 2
+
+
+def test_every_user_facing_rating_count_agrees(conn: sqlite3.Connection) -> None:
+    """The three surfaces that report it must not drift apart again."""
+    from advisor import portable
+    from advisor.models import Paper, upsert_paper
+    from advisor.recommend import profile
+
+    paper = upsert_paper(conn, Paper(title="A", authors=["A"], arxiv_id="r.3"))
+    for _ in range(3):
+        feedback.record(conn, paper, 1)
+
+    exported = portable.export(conn)
+
+    assert feedback.rated_papers(conn) == 1
+    assert profile.feedback_since_last_profile(conn) == 1
+    assert len({entry["paper"] for entry in exported["feedback"]}) == 1

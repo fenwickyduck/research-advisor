@@ -12,6 +12,7 @@ import json
 import sqlite3
 from collections.abc import Iterator
 from pathlib import Path
+from urllib.parse import quote
 
 from fastapi import Depends, FastAPI, Form, Request
 from fastapi import UploadFile
@@ -232,7 +233,7 @@ def data_page(
         "data.html",
         counts={
             "library entries": count("library"),
-            "ratings": count("feedback"),
+            "papers rated": fb.rated_papers(conn),
             "profile versions": count("profile_versions"),
             "followed authors": count("followed_authors"),
         },
@@ -278,7 +279,7 @@ async def data_import(
 
 @app.get("/authors", response_class=HTMLResponse)
 def authors_page(
-    request: Request, conn: sqlite3.Connection = Depends(get_db)
+    request: Request, problem: str = "", conn: sqlite3.Connection = Depends(get_db)
 ) -> HTMLResponse:
     from advisor import authors
 
@@ -287,6 +288,7 @@ def authors_page(
         "authors.html",
         following=authors.following(conn),
         suggestions=authors.suggestions(conn)[:15],
+        problem=problem,
     )
 
 
@@ -296,9 +298,17 @@ def authors_follow(
 ) -> RedirectResponse:
     from advisor import authors
 
-    if name.strip():
-        authors.follow(conn, name)
-    return RedirectResponse("/authors", status_code=303)
+    if not name.strip():
+        return RedirectResponse("/authors", status_code=303)
+
+    result = authors.follow(conn, name)
+    if result:
+        return RedirectResponse("/authors", status_code=303)
+
+    problem = f"“{name.strip()}” — {result.reason}"
+    if result.suggestions:
+        problem += ". Did you mean: " + ", ".join(result.suggestions)
+    return RedirectResponse(f"/authors?problem={quote(problem)}", status_code=303)
 
 
 @app.post("/authors/unfollow")

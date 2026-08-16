@@ -356,13 +356,19 @@ def _follow(args: argparse.Namespace) -> int:
         conn.close()
         return 0
 
+    failed = False
     for name in args.names:
-        if authors.follow(conn, name):
-            print(f"  + {name}")
-        else:
-            print(f"  . {name} (already followed, or not a usable name)")
+        result = authors.follow(conn, name)
+        if result:
+            papers = f" ({result.papers} papers)" if result.papers else ""
+            print(f"  + {name}{papers}")
+            continue
+        failed = True
+        print(f"  ! {name}: {result.reason}", file=sys.stderr)
+        if result.suggestions:
+            print(f"    did you mean: {', '.join(result.suggestions)}", file=sys.stderr)
     conn.close()
-    return 0
+    return 1 if failed else 0
 
 
 def _unfollow(args: argparse.Namespace) -> int:
@@ -439,7 +445,7 @@ def _export(args: argparse.Namespace) -> int:
     data = json.loads(text)
     print(
         f"Wrote {path} — {len(data['library'])} library entries, "
-        f"{len(data['feedback'])} ratings, "
+        f"{len({entry['paper'] for entry in data['feedback']})} papers rated, "
         f"{len(data['profile_versions'])} profile versions, "
         f"{len(data['followed_authors'])} followed authors."
     )
@@ -660,7 +666,14 @@ def _status(args: argparse.Namespace) -> int:
         f"{sources['both'] or 0} on both)"
     )
     print(f"library    {count('library')} entries")
-    print(f"feedback   {count('feedback')} events")
+    from advisor.recommend.feedback import rated_papers
+
+    rated = rated_papers(conn)
+    events = count("feedback")
+    # The two differ whenever you have changed your mind about a paper, and
+    # showing only the row count reads as more opinions than you have given.
+    revisions = f" ({events} ratings including changes)" if events != rated else ""
+    print(f"feedback   {rated} paper(s) rated{revisions}")
     following = count("followed_authors")
     if following:
         print(f"following  {following} author(s)")

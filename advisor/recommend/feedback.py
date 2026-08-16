@@ -101,6 +101,17 @@ def record(
     )
 
 
+def rated_papers(conn: sqlite3.Connection) -> int:
+    """How many *papers* you have rated.
+
+    Feedback is append-only so you can change your mind, which makes the row
+    count a count of clicks rather than of opinions: rating one paper three
+    times is one verdict, not three. Anything shown to a person as "ratings"
+    should use this; only a deletion count should use the raw rows.
+    """
+    return conn.execute("SELECT count(DISTINCT paper_id) FROM feedback").fetchone()[0]
+
+
 def latest_for(conn: sqlite3.Connection) -> dict[int, tuple[int, list[str]]]:
     """Each paper's most recent rating and reasons, keyed by paper id."""
     rows = conn.execute(

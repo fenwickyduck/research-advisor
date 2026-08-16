@@ -112,7 +112,7 @@ Everything is `advisor <command>`; add `--help` to any of them.
 | | |
 |---|---|
 | `advisor profile` | Show your interest profile. `--brief` prints your reading and ratings with instructions, to hand to an assistant of your choosing. |
-| `advisor follow <name>` | Follow an author; their new work appears whatever it is about. No arguments lists who you follow; `--suggest` names authors you have read more than once. |
+| `advisor follow <name>` | Follow an author; their new work appears whatever it is about. Refuses a name nobody in your corpus wrote, and suggests near matches. No arguments lists who you follow; `--suggest` names authors you have read more than once. |
 | `advisor unfollow <name>` | Stop following someone. |
 | `advisor mcp` | Serve your library to an assistant over MCP. `--config` prints the setup command. |
 
