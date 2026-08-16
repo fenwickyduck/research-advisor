@@ -273,3 +273,24 @@ def test_fetch_surfaces_the_gh_error(tmp_path, monkeypatch) -> None:
 
     with pytest.raises(ValueError, match="not authenticated"):
         snapshot.fetch(tmp_path)
+
+
+def test_a_snapshot_carries_its_attribution(
+    conn: sqlite3.Connection, cfg: Config, tmp_path
+) -> None:
+    """IACR permits harvesting on condition of attribution.
+
+    A README does not travel with a tarball, so the condition is recorded in
+    the file itself and can be read without unpacking the rest.
+    """
+    build(conn, cfg)
+    path = tmp_path / "corpus.tar"
+    snapshot.save(conn, cfg, path)
+
+    sources = snapshot.inspect(path)["sources"]
+    names = {s["name"] for s in sources}
+
+    assert names == {"arXiv", "Cryptology ePrint Archive"}
+    iacr = next(s for s in sources if s["name"] == "Cryptology ePrint Archive")
+    assert "IACR" in iacr["attribution"]
+    assert "attribution" in iacr["terms"]

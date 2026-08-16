@@ -46,6 +46,22 @@ from advisor.models import Paper, now, upsert_paper
 FORMAT = "research-advisor/corpus"
 VERSION = 1
 
+SOURCES = [
+    {
+        "name": "arXiv",
+        "url": "https://arxiv.org",
+        "terms": "Descriptive metadata is dedicated to the public domain under "
+        "CC0 1.0. See https://info.arxiv.org/help/api/tou.html",
+    },
+    {
+        "name": "Cryptology ePrint Archive",
+        "url": "https://eprint.iacr.org",
+        "attribution": "© IACR and the respective authors",
+        "terms": "Harvesting is supported subject to attribution being given "
+        "to IACR and to the authors. See https://eprint.iacr.org/operations.html",
+    },
+]
+
 META = "meta.json"
 PAPERS = "papers.jsonl.gz"
 VECTORS = "vectors.f16.npy"
@@ -133,6 +149,10 @@ def save(
         "papers": len(source_rows),
         "dimensions": int(matrix.shape[1]),
         "dtype": "float16",
+        # Carried inside the file rather than left in a README nobody who
+        # downloads a tarball will read. IACR permits harvesting on condition
+        # that attribution is given, so the condition travels with the data.
+        "sources": SOURCES,
     }
 
     path = Path(path).expanduser()

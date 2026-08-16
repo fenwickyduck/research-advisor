@@ -416,10 +416,23 @@ recommendation pipeline has no seam a client could be passed through.
 
 ## Attribution
 
-Paper metadata comes from the [arXiv API](https://arxiv.org), the
-[Cryptology ePrint Archive](https://eprint.iacr.org) (© IACR and the respective
-authors, harvested via OAI-PMH under its stated terms), and
-[Crossref](https://www.crossref.org). A corpus snapshot redistributes that
-metadata; check those terms before publishing one broadly.
+Paper metadata comes from three places, and a corpus snapshot redistributes it,
+so their terms are worth stating plainly.
 
-Licensed under the MIT License — see [LICENSE](LICENSE).
+**[arXiv](https://arxiv.org)** — descriptive metadata (title, abstract, authors,
+identifiers, categories) is dedicated to the public domain under
+[CC0 1.0](https://info.arxiv.org/help/api/tou.html). Redistribution is
+unrestricted.
+
+**[Cryptology ePrint Archive](https://eprint.iacr.org)** — © IACR and the
+respective authors. IACR
+[supports harvesting](https://eprint.iacr.org/operations.html) of its metadata
+on the condition that **attribution is given to IACR and to the authors**, which
+this notice provides. Every snapshot also carries it inside the file itself, so
+it travels with the data rather than staying in a README.
+
+**[Crossref](https://www.crossref.org)** — used only to resolve a DOI you paste
+in, never harvested in bulk.
+
+The code is licensed under the MIT License — see [LICENSE](LICENSE). That covers
+the program, not the paper metadata, which stays under the terms above.
