@@ -72,9 +72,9 @@ fi
 
 say "Ready. Next:"
 cat <<'NEXT'
-    source .venv/bin/activate          # once per terminal
-    advisor add 2401.12345 2024/123    # papers you have read — ten is plenty
-    advisor serve                      # http://127.0.0.1:8000
+    source .venv/bin/activate
+    advisor serve
 
-  Then open the browser and press "Get new recommendations".
+  Then open http://127.0.0.1:8000, add a few papers you have read on the
+  Add page, and press "Get new recommendations".
 NEXT
