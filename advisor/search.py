@@ -13,6 +13,7 @@ a syntax error rather than a search for a quote.
 
 from __future__ import annotations
 
+import html
 import re
 import sqlite3
 from dataclasses import dataclass
@@ -23,6 +24,15 @@ from dataclasses import dataclass
 TOKEN = re.compile(r'-?"[^"]*"|-?[\w][\w\'-]*', re.UNICODE)
 
 
+# FTS5 marks matched terms by wrapping them in strings we choose. Choosing
+# control characters rather than "<mark>" is the whole defence: the snippet is
+# built from abstract text, which is not HTML and is not sanitised by arXiv, so
+# a paper whose abstract contains a script tag would otherwise be rendered as
+# markup by any page that trusts the result. Everything is escaped first and
+# the highlight is put back afterwards, so only these two markers survive.
+OPEN, CLOSE = "\x02", "\x03"
+
+
 @dataclass
 class Hit:
     paper_id: int
@@ -31,6 +41,17 @@ class Hit:
     published_at: str | None
     url: str | None
     snippet: str
+
+    @property
+    def text(self) -> str:
+        """The snippet as plain text, for terminals."""
+        return self.snippet.replace(OPEN, "").replace(CLOSE, "")
+
+    @property
+    def marked(self) -> str:
+        """The snippet as HTML, escaped, with only the highlight re-added."""
+        escaped = html.escape(self.snippet)
+        return escaped.replace(OPEN, "<mark>").replace(CLOSE, "</mark>")
 
 
 def sanitise(query: str) -> str:
@@ -79,7 +100,7 @@ def search(
     try:
         rows = conn.execute(
             """SELECT p.id, p.title, p.authors, p.published_at, p.url,
-                      snippet(papers_fts, 1, '<mark>', '</mark>', '…', 24) AS snippet
+                      snippet(papers_fts, 1, char(2), char(3), '…', 24) AS snippet
                  FROM papers_fts
                  JOIN papers p ON p.id = papers_fts.rowid
                 WHERE papers_fts MATCH ?

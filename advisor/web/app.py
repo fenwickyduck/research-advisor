@@ -48,6 +48,18 @@ def _render(request: Request, template: str, **context) -> HTMLResponse:
     return templates.TemplateResponse(request, template, {"cfg": CFG, **context})
 
 
+def _local(target: str, fallback: str) -> str:
+    """A redirect target that cannot leave this app.
+
+    "starts with a slash" is not enough: `//evil.example.com` is a
+    protocol-relative URL and browsers follow it off-site, as does `/\\evil`
+    on some. Only a single leading slash counts as local.
+    """
+    if target.startswith("/") and not target.startswith(("//", "/\\")):
+        return target
+    return fallback
+
+
 # --------------------------------------------------------------------------- feed
 
 
@@ -214,8 +226,7 @@ def add_one(
            ON CONFLICT(paper_id) DO UPDATE SET status = 'read'""",
         (paper_id, now(), now()),
     )
-    # Only ever bounce back inside this app — `back` arrives from a form field.
-    return RedirectResponse(back if back.startswith("/") else "/search", status_code=303)
+    return RedirectResponse(_local(back, "/search"), status_code=303)
 
 
 # --------------------------------------------------------------------- your data

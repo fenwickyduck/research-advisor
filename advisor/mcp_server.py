@@ -163,7 +163,7 @@ def search_corpus(query: str, limit: int = 15) -> dict[str, Any]:
                     "authors": hit.authors,
                     "year": (hit.published_at or "")[:4] or None,
                     "url": hit.url,
-                    "excerpt": hit.snippet.replace("<mark>", "").replace("</mark>", ""),
+                    "excerpt": hit.text,
                 }
                 for hit in hits
             ],

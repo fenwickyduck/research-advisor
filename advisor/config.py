@@ -26,6 +26,11 @@ CONFIG_FILE = CONFIG_DIR / "config.toml"
 class Config:
     data_dir: Path = DATA_DIR
 
+    # Sent to Crossref so it routes you into its faster "polite pool". Left
+    # empty on purpose: an address is personal and does not belong in a
+    # repository. Harvesting works without it.
+    contact_email: str = ""
+
     # --- corpus ---
     # arXiv categories to harvest. cs.CR is cryptography and security.
     arxiv_categories: tuple[str, ...] = ("cs.CR",)
@@ -77,6 +82,7 @@ _SCALARS = {
     "arxiv_categories": tuple,
     "backfill_from": str,
     "embedding_model": str,
+    "contact_email": str,
 }
 
 

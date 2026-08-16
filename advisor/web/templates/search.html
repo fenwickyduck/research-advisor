@@ -36,9 +36,9 @@
         <p class="paper-meta">
           {{ hit.authors }}{% if hit.published_at %} · {{ hit.published_at[:4] }}{% endif %}
         </p>
-        {# snippet() emits <mark> around the matched terms; it is built from
-           indexed column text, and every other field on this page is escaped. #}
-        {% if hit.snippet %}<p class="snippet">{{ hit.snippet|safe }}</p>{% endif %}
+        {# `marked` escapes the abstract and then re-adds only the highlight,
+           so a paper whose text contains markup cannot inject it here. #}
+        {% if hit.snippet %}<p class="snippet">{{ hit.marked|safe }}</p>{% endif %}
         <div class="actions">
           <form method="post" action="/add/one">
             <input type="hidden" name="paper_id" value="{{ hit.paper_id }}">

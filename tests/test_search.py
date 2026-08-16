@@ -115,3 +115,27 @@ def test_reharvesting_a_paper_does_not_duplicate_it(corpus: sqlite3.Connection) 
         )
 
     assert search.count(corpus, "DEPIR") == 1
+
+
+def test_a_paper_cannot_inject_markup_into_the_results(
+    corpus: sqlite3.Connection,
+) -> None:
+    """arXiv abstracts are not HTML and are not sanitised by anyone upstream.
+
+    A hostile submission would otherwise be harvested into every reader's
+    corpus and run in the browser of anyone whose search matched it.
+    """
+    upsert_paper(
+        corpus,
+        Paper(title="Zerotrust Protocols",
+              abstract="We study zerotrust <script>alert(1)</script> systems.",
+              authors=["A"], arxiv_id="x.9"),
+    )
+
+    hit = search.search(corpus, "zerotrust")[0]
+
+    assert "<script>" not in hit.marked
+    assert "&lt;script&gt;" in hit.marked
+    assert "<mark>" in hit.marked, "the highlight must survive the escaping"
+    # The terminal form carries neither the markers nor markup.
+    assert "\x02" not in hit.text and "<mark>" not in hit.text

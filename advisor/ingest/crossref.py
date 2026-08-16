@@ -14,8 +14,21 @@ import httpx
 from advisor.models import Paper
 
 API = "https://api.crossref.org/works"
-# Crossref asks for a contact address in the User-Agent for the polite pool.
-USER_AGENT = "research-advisor/0.1 (personal reading recommender; mailto:advisor@example.invalid)"
+
+
+def user_agent() -> str:
+    """Identify this client to Crossref, with a contact address if given.
+
+    Crossref routes requests carrying a contact address into a faster "polite
+    pool". That address is personal, so it is never baked into the source —
+    set ``contact_email`` in your config if you want the better service, and
+    the anonymous pool is used otherwise. It works either way.
+    """
+    from advisor import config
+
+    email = (config.load().contact_email or "").strip()
+    contact = f"; mailto:{email}" if email else ""
+    return f"research-advisor/0.1 (personal reading recommender{contact})"
 
 _TAGS = re.compile(r"<[^>]+>")
 _WS = re.compile(r"\s+")
@@ -67,7 +80,7 @@ def parse_work(item: dict) -> Paper | None:
 
 async def fetch(doi: str) -> Paper | None:
     async with httpx.AsyncClient(
-        timeout=30.0, headers={"User-Agent": USER_AGENT}, follow_redirects=True
+        timeout=30.0, headers={"User-Agent": user_agent()}, follow_redirects=True
     ) as client:
         response = await client.get(f"{API}/{doi}")
 

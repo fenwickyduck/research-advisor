@@ -320,8 +320,7 @@ def _search(args: argparse.Namespace) -> int:
         year = (hit.published_at or "????")[:4]
         print(f"({year}) {hit.title}")
         print(f"      {hit.authors}")
-        # snippet() marks the matched terms; the terminal wants them plain.
-        snippet = hit.snippet.replace("<mark>", "").replace("</mark>", "")
+        snippet = hit.text
         if snippet.strip():
             print(f"      {snippet.strip()}")
         print(f"      {hit.url}")

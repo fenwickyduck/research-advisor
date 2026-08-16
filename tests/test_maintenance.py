@@ -391,3 +391,13 @@ def test_clearing_personal_data_removes_the_encoded_profile(
     reset.clear_personal(conn, cfg)
 
     assert not cache.exists()
+
+
+def test_a_redirect_cannot_leave_the_app() -> None:
+    """A single leading slash is local; two are a protocol-relative URL."""
+    from advisor.web.app import _local
+
+    assert _local("/search?q=x", "/") == "/search?q=x"
+    for hostile in ("//evil.example.com", "/\\evil.example.com",
+                    "https://evil.example.com", "javascript:alert(1)"):
+        assert _local(hostile, "/") == "/"
