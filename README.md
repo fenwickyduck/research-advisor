@@ -1,15 +1,18 @@
 # Research Advisor
 
-A personal reading advisor for research papers. You tell it what you have read,
-it tells you what to read next, you tell it what you thought, and it gets
-better at it.
+A local advisor for research papers. It **harvests arXiv and the Cryptology
+ePrint Archive** — about 76,000 papers — and **recommends what to read next**
+from your reading history and the preferences you state. You tell it what you
+have read, it tells you what to read next, you tell it what you thought, and it
+gets better at it.
 
-It runs entirely on your own machine. No account, no API key, no service to
-sign up for, nothing sent anywhere except the public archives it harvests from.
+An AI assistant can consult it over **[MCP](#talking-to-an-assistant-about-it-mcp)**
+— *"what have I been reading?"*, *"steer me toward verifiable computation"* —
+with the advisor answering the questions rather than calling any model itself.
 
 ## How it works
 
-Four moving parts, and it is worth understanding them because every command
+Five moving parts, and it is worth understanding them because every command
 below belongs to one of them.
 
 **1. A corpus.** It downloads the metadata — title, abstract, authors — of
@@ -24,19 +27,27 @@ similar things end up with similar vectors. This is *embedding*, it happens
 locally on your CPU, and it is the slow part — about three hours for the whole
 corpus, or seconds if you load a prebuilt snapshot.
 
-**3. Your library.** The papers you say you have read, plus what you thought of
-them. Averaging their vectors gives a picture of your interests — several
-pictures, in fact, since someone reading across two subfields is badly
-described by one average.
+**3. Your reading history and preferences.** The papers you say you have read,
+plus what you thought of them, plus an [interest
+profile](#the-interest-profile) where you state in words what you want more and
+less of. Averaging the vectors of what you have read gives a picture of your
+interests — several pictures, in fact, since someone reading across two
+subfields is badly described by one average — and the profile's lines are
+encoded alongside them.
 
 **4. Retrieval.** To recommend, it compares your interest vectors against every
 paper in the corpus, drops near-duplicates so a batch is not eight variations
 on one result, excludes anything you have already seen, and adds new work by
 authors you follow. Each recommendation is labelled with the reason it was
-chosen — the paper of yours it is nearest to, or the author you follow.
+chosen — the paper of yours it is nearest to, or the author you follow. Nothing
+in that loop calls a language model.
 
-No language model appears anywhere in that loop, which is why it costs nothing
-to run and why your reading never leaves the machine.
+**5. MCP.** Sitting beside all of that, `advisor mcp` exposes the library, the
+corpus and the profile to an AI assistant over the Model Context Protocol, so
+you can discuss your reading in prose and have the assistant write your profile
+for you. It is the one part that involves a model, and even then the advisor is
+the one being asked, never the one asking. See [Talking to an assistant about
+it](#talking-to-an-assistant-about-it-mcp).
 
 ## Setup
 
@@ -203,7 +214,7 @@ initials only when one side actually abbreviates: **"Wei Chen" matches "W. Chen"
 but not "Wen Chen"**. Reducing both to `chen|w` — the obvious first
 implementation — turned one followed author into four on a corpus this size.
 
-### Talking to an assistant about it
+### Talking to an assistant about it (MCP)
 
 You can point an AI assistant at your library and discuss it — *"what have I
 been reading?"*, *"I want to move toward verifiable computation, what would that
