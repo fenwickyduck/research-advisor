@@ -157,27 +157,81 @@ DEFAULT_REPO = "fenwickyduck/research-advisor"
 def fetch(destination: Path, repo: str = DEFAULT_REPO, progress: Progress = _silent) -> Path:
     """Download the newest published snapshot, returning where it landed.
 
-    Goes through the ``gh`` CLI rather than a plain HTTP request, because the
-    repository is private: ``gh`` already holds the reader's own credentials,
-    so nothing has to be embedded here or pasted by them.
+    Tries an anonymous HTTPS download first, which is all a public repository
+    needs and keeps the dependency list at nothing. A private one answers 404
+    to that, so the GitHub CLI is used instead — it already holds the reader's
+    own credentials, which is why none have to be embedded here.
     """
+    destination = Path(destination).expanduser()
+    destination.mkdir(parents=True, exist_ok=True)
+    progress(f"looking for the newest snapshot in {repo}")
+
+    asset = _public_asset(repo)
+    if asset is not None:
+        name, url = asset
+        target = destination / name
+        progress(f"downloading {name}")
+        _stream(url, target, progress)
+        return target
+
+    return _private_asset(destination, repo, progress)
+
+
+def _public_asset(repo: str) -> tuple[str, str] | None:
+    """(filename, url) of the newest .tar asset, if the repo is readable anonymously."""
+    import httpx
+
+    try:
+        response = httpx.get(
+            f"https://api.github.com/repos/{repo}/releases/latest",
+            headers={"Accept": "application/vnd.github+json"},
+            timeout=30.0,
+            follow_redirects=True,
+        )
+        if response.status_code != 200:
+            return None
+        for asset in response.json().get("assets", []):
+            if asset["name"].endswith(".tar"):
+                return asset["name"], asset["browser_download_url"]
+    except Exception:
+        return None
+    return None
+
+
+def _stream(url: str, target: Path, progress: Progress) -> None:
+    import httpx
+
+    with httpx.stream("GET", url, follow_redirects=True, timeout=None) as response:
+        response.raise_for_status()
+        total = int(response.headers.get("content-length") or 0)
+        seen = 0
+        step = 25 * 1024 * 1024
+        next_report = step
+        with target.open("wb") as handle:
+            for chunk in response.iter_bytes():
+                handle.write(chunk)
+                seen += len(chunk)
+                if seen >= next_report:
+                    of = f" of {total / 1048576:.0f}" if total else ""
+                    progress(f"  {seen / 1048576:.0f}{of} MB")
+                    next_report += step
+
+
+def _private_asset(destination: Path, repo: str, progress: Progress) -> Path:
     import shutil
     import subprocess
 
     if shutil.which("gh") is None:
         raise ValueError(
-            "the GitHub CLI ('gh') is not installed, and the repository is "
-            "private so the snapshot cannot be downloaded anonymously.\n"
-            "Install it from https://cli.github.com and run 'gh auth login', "
-            f"or download the asset by hand from\n"
+            f"could not download the snapshot from {repo}.\n"
+            "If the repository is private you need the GitHub CLI: install it "
+            "from https://cli.github.com, run 'gh auth login', and try again.\n"
+            f"Otherwise download the asset by hand from\n"
             f"  https://github.com/{repo}/releases\n"
             "and pass it to 'advisor snapshot load'."
         )
 
-    destination = Path(destination).expanduser()
-    destination.mkdir(parents=True, exist_ok=True)
-    progress(f"downloading the newest snapshot from {repo}")
-
+    progress("not readable anonymously — using the GitHub CLI")
     result = subprocess.run(
         ["gh", "release", "download", "--repo", repo, "--pattern", "*.tar",
          "--dir", str(destination), "--clobber"],

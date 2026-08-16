@@ -100,7 +100,7 @@ Everything is `advisor <command>`; add `--help` to any of them.
 | `advisor add <ids…>` | Record papers you have read. Takes arXiv IDs, ePrint IDs, DOIs, or any URL containing one — as arguments, or one per line on stdin. Also at `/add`. |
 | `advisor harvest` | Download new paper metadata from arXiv and ePrint. Incremental: it remembers where it got to, so later runs fetch only what changed. Safe to interrupt. |
 | `advisor embed` | Turn papers into vectors. Resumable, and ordered so partial results are useful. Nothing can be recommended until it is embedded. |
-| `advisor snapshot fetch` | Download the shared corpus and load it — 76,000 papers, already embedded, in about a minute. Needs `gh` logged in, since the repository is private. |
+| `advisor snapshot fetch` | Download the shared corpus and load it — 76,000 papers, already embedded, in about a minute. Falls back to the GitHub CLI if the repository is private. |
 | `advisor snapshot save\|load\|show <file>` | Write, restore or inspect that file yourself. |
 
 ### Getting papers out
@@ -391,7 +391,17 @@ at this installation's absolute path. It installs nothing.
 
 Settings, if you want any, go in `~/.config/advisor/config.toml`. See
 `advisor/config.py` for the keys and defaults — which categories to harvest, how
-far back, how many recommendations, how hard a "More of" line pulls.
+far back, how many recommendations, how hard a "More of" line pulls, and
+`contact_email`, which Crossref uses to route you into a faster pool.
+
+## A note on running it
+
+`advisor serve` binds to `127.0.0.1`, so it is reachable only from your own
+machine. **Keep it that way.** There are no accounts and no passwords, because
+there is exactly one of you — so anything that can reach the port can read your
+library and rewrite your profile. If you pass `--host 0.0.0.0` to put it on your
+network, put it behind something that authenticates, or use an SSH tunnel or a
+private network like Tailscale instead.
 
 ## Tests
 

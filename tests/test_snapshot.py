@@ -206,54 +206,70 @@ def test_junk_is_refused(target, tmp_path) -> None:
 # ---------------------------------------------------------------------- fetching
 
 
-def test_fetch_explains_itself_when_gh_is_missing(tmp_path, monkeypatch) -> None:
-    """The repository is private, so there is no anonymous fallback to offer."""
+def test_fetch_prefers_an_anonymous_download(tmp_path, monkeypatch) -> None:
+    """A public repository needs no credentials and no extra tooling."""
+    monkeypatch.setattr(
+        snapshot, "_public_asset", lambda repo: ("corpus-2026-01-01.tar", "https://x/y")
+    )
+
+    def pretend_stream(url, target, progress):
+        target.write_bytes(b"x")
+
+    monkeypatch.setattr(snapshot, "_stream", pretend_stream)
+
+    assert snapshot.fetch(tmp_path).name == "corpus-2026-01-01.tar"
+
+
+def test_fetch_falls_back_to_gh_for_a_private_repository(tmp_path, monkeypatch) -> None:
+    import shutil
+    import subprocess
+
+    monkeypatch.setattr(snapshot, "_public_asset", lambda repo: None)
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/gh")
+
+    def pretend(*args, **kwargs):
+        (tmp_path / "corpus-2026-02-02.tar").write_bytes(b"x")
+        return subprocess.CompletedProcess(args, 0, "", "")
+
+    monkeypatch.setattr(subprocess, "run", pretend)
+
+    assert snapshot.fetch(tmp_path).name == "corpus-2026-02-02.tar"
+
+
+def test_fetch_explains_itself_when_neither_route_works(tmp_path, monkeypatch) -> None:
+    """The likeliest confusion: a private repo and no GitHub CLI."""
     import shutil
 
+    monkeypatch.setattr(snapshot, "_public_asset", lambda repo: None)
     monkeypatch.setattr(shutil, "which", lambda name: None)
 
     with pytest.raises(ValueError, match="GitHub CLI"):
         snapshot.fetch(tmp_path)
 
 
-def test_fetch_surfaces_the_download_error(tmp_path, monkeypatch) -> None:
+def test_a_broken_network_does_not_raise_from_the_lookup(monkeypatch) -> None:
+    """An offline machine should fall through to gh, not crash."""
+    import httpx
+
+    def boom(*args, **kwargs):
+        raise httpx.ConnectError("no network")
+
+    monkeypatch.setattr(httpx, "get", boom)
+
+    assert snapshot._public_asset("owner/repo") is None
+
+
+def test_fetch_surfaces_the_gh_error(tmp_path, monkeypatch) -> None:
     import shutil
     import subprocess
 
-    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/gh")
-
-    def failed(*args, **kwargs):
-        return subprocess.CompletedProcess(args, 1, "", "gh: not authenticated")
-
-    monkeypatch.setattr(subprocess, "run", failed)
-
-    with pytest.raises(ValueError, match="not authenticated"):
-        snapshot.fetch(tmp_path)
-
-
-def test_fetch_returns_what_it_downloaded(tmp_path, monkeypatch) -> None:
-    import shutil
-    import subprocess
-
-    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/gh")
-
-    def pretend(*args, **kwargs):
-        (tmp_path / "corpus-2026-01-01.tar").write_bytes(b"x")
-        return subprocess.CompletedProcess(args, 0, "", "")
-
-    monkeypatch.setattr(subprocess, "run", pretend)
-
-    assert snapshot.fetch(tmp_path).name == "corpus-2026-01-01.tar"
-
-
-def test_fetch_says_so_when_a_release_has_no_snapshot(tmp_path, monkeypatch) -> None:
-    import shutil
-    import subprocess
-
+    monkeypatch.setattr(snapshot, "_public_asset", lambda repo: None)
     monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/gh")
     monkeypatch.setattr(
-        subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a, 0, "", "")
+        subprocess,
+        "run",
+        lambda *a, **k: subprocess.CompletedProcess(a, 1, "", "gh: not authenticated"),
     )
 
-    with pytest.raises(ValueError, match="no snapshot asset"):
+    with pytest.raises(ValueError, match="not authenticated"):
         snapshot.fetch(tmp_path)
