@@ -500,7 +500,19 @@ def _snapshot(args: argparse.Namespace) -> int:
             print(message, flush=True)
 
     try:
-        if args.action == "save":
+        if args.action == "fetch":
+            import tempfile
+
+            target = Path(args.path) if args.path else Path(tempfile.mkdtemp())
+            downloaded = snapshot.fetch(target, progress=say)
+            say(f"got {downloaded.name} ({downloaded.stat().st_size / 1048576:.0f} MB)")
+            meta = snapshot.load(conn, cfg, downloaded, say, replace=args.replace)
+            print(
+                f"\nRestored {meta['restored']} papers embedded with "
+                f"{meta['embedding_model']}."
+            )
+            print("Run 'advisor harvest' to pick up anything published since.")
+        elif args.action == "save":
             meta = snapshot.save(conn, cfg, Path(args.path), say)
             size = Path(args.path).stat().st_size / 1048576
             print(
@@ -800,8 +812,10 @@ def main(argv: list[str] | None = None) -> int:
     snapshot_cmd = sub.add_parser(
         "snapshot", help="share or restore the corpus and its vectors"
     )
-    snapshot_cmd.add_argument("action", choices=["save", "load", "show"])
-    snapshot_cmd.add_argument("path")
+    snapshot_cmd.add_argument("action", choices=["fetch", "save", "load", "show"])
+    snapshot_cmd.add_argument(
+        "path", nargs="?", help="file to read or write; omit when fetching"
+    )
     snapshot_cmd.add_argument(
         "--replace", action="store_true", help="on load, discard local vectors first"
     )

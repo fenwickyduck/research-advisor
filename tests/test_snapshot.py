@@ -201,3 +201,59 @@ def test_junk_is_refused(target, tmp_path) -> None:
 
     with pytest.raises(ValueError, match="not a corpus snapshot"):
         snapshot.load(other, other_cfg, path)
+
+
+# ---------------------------------------------------------------------- fetching
+
+
+def test_fetch_explains_itself_when_gh_is_missing(tmp_path, monkeypatch) -> None:
+    """The repository is private, so there is no anonymous fallback to offer."""
+    import shutil
+
+    monkeypatch.setattr(shutil, "which", lambda name: None)
+
+    with pytest.raises(ValueError, match="GitHub CLI"):
+        snapshot.fetch(tmp_path)
+
+
+def test_fetch_surfaces_the_download_error(tmp_path, monkeypatch) -> None:
+    import shutil
+    import subprocess
+
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/gh")
+
+    def failed(*args, **kwargs):
+        return subprocess.CompletedProcess(args, 1, "", "gh: not authenticated")
+
+    monkeypatch.setattr(subprocess, "run", failed)
+
+    with pytest.raises(ValueError, match="not authenticated"):
+        snapshot.fetch(tmp_path)
+
+
+def test_fetch_returns_what_it_downloaded(tmp_path, monkeypatch) -> None:
+    import shutil
+    import subprocess
+
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/gh")
+
+    def pretend(*args, **kwargs):
+        (tmp_path / "corpus-2026-01-01.tar").write_bytes(b"x")
+        return subprocess.CompletedProcess(args, 0, "", "")
+
+    monkeypatch.setattr(subprocess, "run", pretend)
+
+    assert snapshot.fetch(tmp_path).name == "corpus-2026-01-01.tar"
+
+
+def test_fetch_says_so_when_a_release_has_no_snapshot(tmp_path, monkeypatch) -> None:
+    import shutil
+    import subprocess
+
+    monkeypatch.setattr(shutil, "which", lambda name: "/usr/bin/gh")
+    monkeypatch.setattr(
+        subprocess, "run", lambda *a, **k: subprocess.CompletedProcess(a, 0, "", "")
+    )
+
+    with pytest.raises(ValueError, match="no snapshot asset"):
+        snapshot.fetch(tmp_path)

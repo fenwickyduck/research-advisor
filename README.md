@@ -45,39 +45,42 @@ Needs Python 3.11+ and about 2 GB of disk.
 ```sh
 git clone https://github.com/fenwickyduck/research-advisor.git
 cd research-advisor
-python3 -m venv .venv
-source .venv/bin/activate          # every new terminal needs this
-pip install -e '.[all]'
+./install.sh
+```
+
+That is the whole thing. It creates the virtualenv, installs, and — if you have
+the [GitHub CLI](https://cli.github.com) logged in — downloads the shared corpus
+snapshot, so you skip an hour of harvesting and three hours of encoding. Safe to
+re-run; every step checks whether it is already done.
+
+Then:
+
+```sh
+source .venv/bin/activate          # once per terminal
+advisor add 2401.12345 2024/123    # papers you have read — ten is plenty
+advisor serve                      # http://127.0.0.1:8000
 ```
 
 **Activating the virtualenv is what puts `advisor` on your `PATH`.** Without it
-you get `command not found`, because the command lives in `.venv/bin/` and
-nothing outside that environment knows about it. You need `source
-.venv/bin/activate` once per terminal session.
+you get `command not found`, because the command lives in `.venv/bin/`. If you
+would rather not activate anything, every command also works spelled out —
+`.venv/bin/advisor status`. That is the form for scripts and cron, which have no
+shell to activate in; `advisor schedule` and `advisor mcp --config` already print
+absolute paths for that reason.
 
-If you would rather not activate anything, every command below also works
-spelled out in full — `.venv/bin/advisor status` instead of `advisor status`.
-That is the form to use in scripts and cron jobs, which have no shell to
-activate in; `advisor schedule` and `advisor mcp --config` already print
-absolute paths for exactly that reason.
+### Doing it by hand
 
-Then either **start from a snapshot** (minutes) —
-
-```sh
-# Download corpus.tar from this repository's Releases page, then:
-advisor snapshot load corpus.tar     # ~76,000 papers, already embedded
-advisor harvest                      # anything published since it was made
-advisor add 2401.12345 2024/123      # papers you have read — ten is plenty
-advisor serve                        # http://127.0.0.1:8000
-```
-
-— or **build it yourself** (an evening), which requires trusting nobody's file:
+If you would rather not run a script, or you want to build the corpus yourself
+instead of trusting a prebuilt file:
 
 ```sh
-advisor add 2401.12345 2024/123      # papers you have read
-advisor harvest                      # tens of minutes
-advisor embed                        # ~3 hours on a laptop CPU
-advisor serve
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e '.[all]'
+
+advisor snapshot fetch             # download the shared corpus (~151 MB), or:
+advisor harvest                    # build it yourself — tens of minutes
+advisor embed                      # ~3 hours on a laptop CPU
 ```
 
 You do not have to wait for `advisor embed` to finish. It encodes your own
@@ -96,7 +99,8 @@ Everything is `advisor <command>`; add `--help` to any of them.
 | `advisor add <ids…>` | Record papers you have read. Takes arXiv IDs, ePrint IDs, DOIs, or any URL containing one — as arguments, or one per line on stdin. Also at `/add`. |
 | `advisor harvest` | Download new paper metadata from arXiv and ePrint. Incremental: it remembers where it got to, so later runs fetch only what changed. Safe to interrupt. |
 | `advisor embed` | Turn papers into vectors. Resumable, and ordered so partial results are useful. Nothing can be recommended until it is embedded. |
-| `advisor snapshot save\|load\|show <file>` | Share or restore the whole corpus and its vectors as one file, instead of harvesting and embedding it yourself. |
+| `advisor snapshot fetch` | Download the shared corpus and load it — 76,000 papers, already embedded, in about a minute. Needs `gh` logged in, since the repository is private. |
+| `advisor snapshot save\|load\|show <file>` | Write, restore or inspect that file yourself. |
 
 ### Getting papers out
 

@@ -151,6 +151,51 @@ def save(
     return meta
 
 
+DEFAULT_REPO = "fenwickyduck/research-advisor"
+
+
+def fetch(destination: Path, repo: str = DEFAULT_REPO, progress: Progress = _silent) -> Path:
+    """Download the newest published snapshot, returning where it landed.
+
+    Goes through the ``gh`` CLI rather than a plain HTTP request, because the
+    repository is private: ``gh`` already holds the reader's own credentials,
+    so nothing has to be embedded here or pasted by them.
+    """
+    import shutil
+    import subprocess
+
+    if shutil.which("gh") is None:
+        raise ValueError(
+            "the GitHub CLI ('gh') is not installed, and the repository is "
+            "private so the snapshot cannot be downloaded anonymously.\n"
+            "Install it from https://cli.github.com and run 'gh auth login', "
+            f"or download the asset by hand from\n"
+            f"  https://github.com/{repo}/releases\n"
+            "and pass it to 'advisor snapshot load'."
+        )
+
+    destination = Path(destination).expanduser()
+    destination.mkdir(parents=True, exist_ok=True)
+    progress(f"downloading the newest snapshot from {repo}")
+
+    result = subprocess.run(
+        ["gh", "release", "download", "--repo", repo, "--pattern", "*.tar",
+         "--dir", str(destination), "--clobber"],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise ValueError(
+            f"could not download from {repo}: {result.stderr.strip() or 'unknown error'}\n"
+            "If this says authentication, run 'gh auth login' first."
+        )
+
+    downloaded = sorted(destination.glob("*.tar"), key=lambda p: p.stat().st_mtime)
+    if not downloaded:
+        raise ValueError(f"no snapshot asset found in the releases of {repo}")
+    return downloaded[-1]
+
+
 def inspect(path: Path) -> dict[str, Any]:
     """Read a snapshot's metadata without unpacking the rest of it."""
     with tarfile.open(Path(path).expanduser(), "r") as tar:
