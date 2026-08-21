@@ -1,4 +1,4 @@
-# Research Advisor
+# Advisor
 
 A local advisor for research papers. It **harvests arXiv and the Cryptology
 ePrint Archive** — about 76,000 papers — and **recommends what to read next**
@@ -54,8 +54,8 @@ it](#talking-to-an-assistant-about-it-mcp).
 Needs Python 3.11+ and about 2 GB of disk.
 
 ```sh
-git clone https://github.com/fenwickyduck/research-advisor.git
-cd research-advisor
+git clone https://github.com/fenwickyduck/advisor.git
+cd advisor
 ./install.sh
 ```
 
@@ -120,7 +120,7 @@ Everything is `advisor <command>`; add `--help` to any of them.
 |---|---|
 | `advisor recommend` | What to read next. Records the batch, as the web feed does, so nothing is suggested twice. `--preview` looks without recording; `-n` sets how many. |
 | `advisor search <query>` | Full-text search over the corpus. Quote a phrase to keep it together; prefix a word with `-` to exclude it. |
-| `advisor serve` | The web UI at `http://127.0.0.1:8000` — feed, library, search, authors, profile, data. |
+| `advisor serve` | The web UI at `http://127.0.0.1:8000` — feed, library and search across the top, with your interests, the authors you follow and your data behind **Settings**. |
 | `advisor status` | What is in the database and how far embedding has got. Start here when something seems wrong. |
 
 ### Teaching it about you
@@ -252,7 +252,7 @@ needs. Then pick your assistant.
 **Claude Code** — the terminal tool. Works on Linux, macOS and Windows:
 
 ```sh
-claude mcp add research-advisor -- /full/path/to/.venv/bin/advisor mcp
+claude mcp add advisor -- /full/path/to/.venv/bin/advisor mcp
 claude mcp list      # should print: ✔ Connected
 ```
 
@@ -263,13 +263,13 @@ claude mcp list      # should print: ✔ Connected
 | macOS | `~/Library/Application Support/Claude/claude_desktop_config.json` |
 | Windows | `%APPDATA%\Claude\claude_desktop_config.json` |
 
-and add the `research-advisor` entry inside `mcpServers`, keeping any that are
+and add the `advisor` entry inside `mcpServers`, keeping any that are
 already there:
 
 ```json
 {
   "mcpServers": {
-    "research-advisor": {
+    "advisor": {
       "command": "/full/path/to/.venv/bin/advisor",
       "args": ["mcp"]
     }
@@ -277,7 +277,7 @@ already there:
 }
 ```
 
-On Windows the path is `C:\\Users\\you\\research-advisor\\.venv\\Scripts\\advisor.exe`
+On Windows the path is `C:\\Users\\you\\advisor\\.venv\\Scripts\\advisor.exe`
 — note that JSON needs each backslash doubled.
 
 **Either way, restart the assistant afterwards.** MCP servers are launched when

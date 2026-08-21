@@ -76,7 +76,7 @@ async def test_the_server_starts_and_advertises_its_tools(seeded: str) -> None:
             init = await session.initialize()
             listing = await session.list_tools()
 
-            assert init.server_info.name == "research-advisor"
+            assert init.server_info.name == "advisor"
             names = {tool.name for tool in listing.tools}
             assert {"library", "search_corpus", "write_interest_profile"} <= names
 

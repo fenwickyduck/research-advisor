@@ -54,8 +54,8 @@ is actually called, and use the real vocabulary in the steering lines.
 """
 
 server = MCPServer(
-    name="research-advisor",
-    title="Research Advisor",
+    name="advisor",
+    title="Advisor",
     instructions=INSTRUCTIONS,
     version="0.1.0",
 )
@@ -390,7 +390,7 @@ def refresh_profile() -> str:
 
     if not brief:
         return (
-            "My research advisor has nothing to write a profile from yet — no "
+            "My advisor has nothing to write a profile from yet — no "
             "papers in the library. Tell me to add some reading first, with "
             "`advisor add` or the /add page."
         )
@@ -490,7 +490,7 @@ def review_feed() -> str:
     )
 
     return (
-        f"Here is what my research advisor is recommending. I have "
+        f"Here is what my advisor is recommending. I have "
         f"{library_size} paper(s) in my library.\n\n{listing}\n\n"
         "Go through these with me. For any you cannot judge from the title, "
         "read the abstract with `paper`. I want to know which are worth my "
@@ -507,7 +507,7 @@ def review_feed() -> str:
 def client_config(command: str) -> str:
     """The JSON block a client needs in order to launch this server."""
     return json.dumps(
-        {"mcpServers": {"research-advisor": {"command": command, "args": ["mcp"]}}},
+        {"mcpServers": {"advisor": {"command": command, "args": ["mcp"]}}},
         indent=2,
     )
 

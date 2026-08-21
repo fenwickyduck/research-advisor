@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Profile · Research Advisor{% endblock %}
+{% block title %}Interests · advisor{% endblock %}
 
 {% macro editor(content, label) %}
   <form method="post" action="/profile/edit">
     <textarea name="content" rows="18">{{ content }}</textarea>
-    <div class="actions"><button type="submit" class="primary">{{ label }}</button></div>
+    <div class="acts"><button type="submit" class="primary">{{ label }}</button></div>
   </form>
 {% endmacro %}
 
@@ -19,55 +19,77 @@
 {% endmacro %}
 
 {% block content %}
+{% include "_tabs.html" %}
+
 <div class="page-head">
-  <h1>How the advisor sees you</h1>
+  <div>
+    <h1>Interests</h1>
+    <p class="page-sub">What the advisor thinks you want, and what it searches on.</p>
+  </div>
 </div>
 
-<p class="status-line">
+<p class="counts">
   {% if profile %}
-    Last written by <strong>{{ profile.written_by }}</strong> on {{ profile.created_at[:10] }} ·
+    <span>Last written by <b>{{ profile.written_by }}</b> on {{ profile.created_at[:10] }}</span>
   {% endif %}
-  <strong>{{ pending }}</strong> new rating{{ "" if pending == 1 else "s" }} since
-  it was written
+  <span><b>{{ pending }}</b> new rating{{ "" if pending == 1 else "s" }} since</span>
 </p>
 
 {% if profile %}
   {% if steer %}
-    <div class="card">
-      <p class="paper-meta">Steering your next batch</p>
-      <ul class="steer">
-        {% for item in steer.more %}<li class="more">more: {{ item }}</li>{% endfor %}
-        {% for item in steer.less %}<li class="less">less: {{ item }}</li>{% endfor %}
-      </ul>
-    </div>
+    <section class="panel">
+      <h2 class="panel-head">Steering your next batch</h2>
+      {% if steer.more %}
+        <div class="steer-group">
+          <p class="steer-label">Toward</p>
+          <ul class="steer">
+            {% for item in steer.more %}<li class="more">{{ item }}</li>{% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      {% if steer.less %}
+        <div class="steer-group">
+          <p class="steer-label">Away from</p>
+          <ul class="steer">
+            {% for item in steer.less %}<li class="less">{{ item }}</li>{% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </section>
   {% else %}
-    <div class="card">
-      <p class="paper-meta">Not steering anything yet</p>
-      <p>This profile is all prose, so retrieval cannot act on it. Add a
+    <section class="panel">
+      <h2 class="panel-head">Not steering anything yet</h2>
+      <p class="hint">This profile is all prose, so retrieval cannot act on it. Add a
          <code>## More of</code> or <code>## Less of</code> section below and it will.</p>
-    </div>
+    </section>
   {% endif %}
 
-  <div class="card profile-body">{{ profile.content }}</div>
+  <article class="prose">{{ profile.content|richtext }}</article>
 
-  <details class="edit">
+  <details class="disclose">
     <summary>Edit it yourself</summary>
-    <p class="hint">
-      You get the last word. Your edit is saved as a new version, not an overwrite.
-    </p>
-    {{ steering_help() }}
-    {{ editor(profile.content, "Save my version") }}
+    <div class="disclose-body">
+      <p class="hint">
+        You get the last word. Your edit is saved as a new version, not an overwrite.
+      </p>
+      {{ steering_help() }}
+      {{ editor(profile.content, "Save my version") }}
+    </div>
   </details>
 
   {% if history %}
     <h2>Earlier versions</h2>
-    <ul class="cards">
+    <ul class="versions">
       {% for old in history %}
-        <li class="card">
-          <p class="paper-meta">{{ old.created_at[:16] }} · written by {{ old.written_by }}</p>
-          <details class="abstract">
-            <summary>{{ old.content[:160] }}…</summary>
-            <p>{{ old.content }}</p>
+        <li>
+          <details class="disclose">
+            <summary>
+              <span class="version-when">{{ old.created_at[:16] | replace("T", " ") }}</span>
+              <span class="version-who">written by {{ old.written_by }}</span>
+            </summary>
+            <div class="disclose-body">
+              <article class="prose prose-sm">{{ old.content|richtext }}</article>
+            </div>
           </details>
         </li>
       {% endfor %}
@@ -75,27 +97,32 @@
   {% endif %}
 {% else %}
   <div class="empty">
-    <p>No profile yet. Write one below — the advisor will use it immediately, and it
-       does not need a library first.</p>
+    <p class="empty-head">No profile yet.</p>
+    <p>Write one below — the advisor will use it immediately, and it does not need a
+       library first.</p>
   </div>
 
-  <details class="edit" open>
+  <details class="disclose" open>
     <summary>Write one</summary>
-    {{ steering_help() }}
-    {{ editor(starter, "Save profile") }}
+    <div class="disclose-body">
+      {{ steering_help() }}
+      {{ editor(starter, "Save profile") }}
+    </div>
   </details>
 {% endif %}
 
 {% if brief %}
-  <details class="edit">
+  <details class="disclose">
     <summary>Have an assistant write it</summary>
-    <p class="hint">
-      The advisor never calls a model and holds no API key. If you would rather not
-      write the profile yourself, copy the text below into whatever assistant you
-      already have — Claude on the web, say — and paste its answer into the editor
-      above. Nothing leaves this machine unless you carry it there.
-    </p>
-    <textarea rows="14" readonly onclick="this.select()">{{ brief }}</textarea>
+    <div class="disclose-body">
+      <p class="hint">
+        The advisor never calls a model and holds no API key. If you would rather not
+        write the profile yourself, copy the text below into whatever assistant you
+        already have — Claude on the web, say — and paste its answer into the editor
+        above. Nothing leaves this machine unless you carry it there.
+      </p>
+      <textarea rows="14" readonly onclick="this.select()">{{ brief }}</textarea>
+    </div>
   </details>
 {% endif %}
 
@@ -105,12 +132,14 @@
     Retrieval cannot read a note, but it can read a line you lift out of one into
     <code>## More of</code> or <code>## Less of</code>.
   </p>
-  <ul class="cards">
+  <ul class="notes">
     {% for note in notes %}
-      <li class="card">
-        <p>“{{ note.note }}”</p>
-        <p class="paper-meta">
-          on {{ note.title }} · {{ "liked" if note.rating > 0 else "rejected" }}
+      <li>
+        <blockquote>{{ note.note }}</blockquote>
+        <p class="byline">
+          <span>{{ note.title }}</span><span class="sep">·</span>
+          <span class="{{ 'up' if note.rating > 0 else 'down' }}">
+            {{ "liked" if note.rating > 0 else "rejected" }}</span>
         </p>
       </li>
     {% endfor %}

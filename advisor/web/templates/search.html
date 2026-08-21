@@ -1,57 +1,77 @@
 {% extends "base.html" %}
-{% block title %}Search · Research Advisor{% endblock %}
+{% import "_icons.html" as ico %}
+{% block title %}Search · advisor{% endblock %}
 
 {% block content %}
-<div class="page-head"><h1>Search the corpus</h1></div>
+<div class="page-head">
+  <div>
+    <h1>Search</h1>
+    <p class="page-sub">Full text over every harvested paper — a way to find something
+       specific, and to add what you have already read.</p>
+  </div>
+</div>
 
 <form method="get" action="/search" class="searchbar">
-  <input type="search" name="q" value="{{ query }}" autofocus
-         aria-label="Search {{ corpus_size }} papers">
+  <label class="field">
+    {{ ico.icon("search") }}
+    <input type="search" name="q" value="{{ query }}" autofocus
+           placeholder="lattice isomorphism, &quot;private information retrieval&quot;, -survey"
+           aria-label="Search {{ corpus_size }} papers">
+  </label>
   <button type="submit" class="primary">Search</button>
 </form>
 
-<p class="status-line">
+<p class="counts">
   {% if query %}
-    <strong>{{ total }}</strong> match{{ "" if total == 1 else "es" }} in
-    {{ corpus_size }} papers
-    {%- if total > hits|length %}, showing {{ hits|length }}{% endif %}
+    <span><b>{{ "{:,}".format(total) }}</b> match{{ "" if total == 1 else "es" }}
+      in {{ "{:,}".format(corpus_size) }} papers
+      {%- if total > hits|length %}, showing {{ hits|length }}{% endif %}</span>
   {% else %}
-    <strong>{{ corpus_size }}</strong> papers indexed · quote a phrase to keep it
-    together, prefix a word with <code>-</code> to exclude it
+    <span><b>{{ "{:,}".format(corpus_size) }}</b> papers indexed</span>
+    <span class="tip">quote a phrase to keep it together, prefix a word with
+      <code>-</code> to exclude it</span>
   {% endif %}
 </p>
 
 {% if query and not hits %}
-  <div class="empty"><p>Nothing matched “{{ query }}”.</p></div>
+  <div class="empty">
+    <p class="empty-head">Nothing matched “{{ query }}”.</p>
+    <p>Try fewer words, or drop a quoted phrase.</p>
+  </div>
 {% endif %}
 
 {% if hits %}
-  <ul class="cards">
+  <ol class="list">
     {% for hit in hits %}
-      <li class="card">
-        <h3 class="paper-title">
-          {% if hit.url %}<a href="{{ hit.url }}">{{ hit.title }}</a>
-          {% else %}{{ hit.title }}{% endif %}
-        </h3>
-        <p class="paper-meta">
-          {{ hit.authors }}{% if hit.published_at %} · {{ hit.published_at[:4] }}{% endif %}
-        </p>
-        {# `marked` escapes the abstract and then re-adds only the highlight,
-           so a paper whose text contains markup cannot inject it here. #}
-        {% if hit.snippet %}<p class="snippet">{{ hit.marked|safe }}</p>{% endif %}
-        <div class="actions">
-          <form method="post" action="/add/one">
-            <input type="hidden" name="paper_id" value="{{ hit.paper_id }}">
-            <input type="hidden" name="back" value="/search?q={{ query|urlencode }}">
-            <button type="submit">I have read this</button>
-          </form>
+      <li class="item">
+        <div class="gutter"><span class="rank">{{ "%02d"|format(loop.index) }}</span></div>
+        <div class="body">
+          <h2 class="title">
+            {% if hit.url %}<a href="{{ hit.url }}" target="_blank" rel="noopener">{{ hit.title }}</a>
+            {% else %}{{ hit.title }}{% endif %}
+          </h2>
+          <p class="byline">
+            <span>{{ hit.authors }}</span>
+            {% if hit.published_at %}<span class="sep">·</span><span>{{ hit.published_at[:4] }}</span>{% endif %}
+          </p>
+          {# `marked` escapes the abstract and then re-adds only the highlight,
+             so a paper whose text contains markup cannot inject it here. #}
+          {% if hit.snippet %}<p class="snippet">{{ hit.marked|safe }}</p>{% endif %}
+          <div class="acts">
+            <form method="post" action="/add/one">
+              <input type="hidden" name="paper_id" value="{{ hit.paper_id }}">
+              <input type="hidden" name="back" value="/search?q={{ query|urlencode }}">
+              <button type="submit" class="act">{{ ico.icon("plus") }} I have read this</button>
+            </form>
+          </div>
         </div>
       </li>
     {% endfor %}
-  </ul>
+  </ol>
 
   {% if total > hits|length %}
-    <p><a href="/search?q={{ query|urlencode }}&amp;n={{ hits|length + 25 }}">Show more</a></p>
+    <p class="load-more"><a href="/search?q={{ query|urlencode }}&amp;n={{ hits|length + 25 }}">
+      Show more results</a></p>
   {% endif %}
 {% endif %}
 {% endblock %}

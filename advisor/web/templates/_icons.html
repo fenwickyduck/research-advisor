@@ -1,0 +1,35 @@
+{# Inline SVG, so the icons are monochrome, crisp at any size, and inherit the
+   theme. They replace the emoji, which rendered as flat glyphs that matched
+   nothing else on the page.
+
+   The width/height attributes are not redundant with the CSS that overrides
+   them: an inline SVG with neither lays out at 300x150, so a page that loads
+   without its stylesheet becomes a wall of giant icons rather than a plain
+   one. Every SVG in this app carries its own size for that reason. #}
+{% macro icon(name) -%}
+<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+     stroke="currentColor"
+     stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{%- if name == "up" -%}
+  <path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>
+{%- elif name == "down" -%}
+  <path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/>
+{%- elif name == "later" -%}
+  <path d="M6 4h12a1 1 0 0 1 1 1v15l-7-4.5L5 20V5a1 1 0 0 1 1-1z"/>
+{%- elif name == "close" -%}
+  <path d="M18 6 6 18M6 6l12 12"/>
+{%- elif name == "plus" -%}
+  <path d="M12 5v14M5 12h14"/>
+{%- elif name == "chevron" -%}
+  <path d="m6 9 6 6 6-6"/>
+{%- elif name == "search" -%}
+  <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+{%- elif name == "trash" -%}
+  <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+{%- elif name == "pdf" -%}
+  <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>
+{%- elif name == "external" -%}
+  <path d="M15 3h6v6M10 14 21 3M19 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h6"/>
+{%- endif -%}
+</svg>
+{%- endmacro %}

@@ -1,0 +1,9 @@
+{# The three pages behind "Settings". They are one subject — how the advisor is
+   aimed and what it holds on you — so once you are in any of them you can move
+   between them without going back through the menu. #}
+{% set path = request.url.path %}
+<nav class="tabs" aria-label="Settings">
+  <a href="/profile"{% if path.startswith("/profile") %} aria-current="page"{% endif %}>Interests</a>
+  <a href="/authors"{% if path.startswith("/authors") %} aria-current="page"{% endif %}>Following</a>
+  <a href="/data"{% if path.startswith("/data") %} aria-current="page"{% endif %}>Your data</a>
+</nav>

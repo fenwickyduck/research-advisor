@@ -196,7 +196,7 @@ def test_ratings_and_notes_survive_the_round_trip(
     [
         ("not json at all", "not valid JSON"),
         ("[1, 2, 3]", "expected a JSON object"),
-        ('{"format": "something/else"}', "not a research-advisor export"),
+        ('{"format": "something/else"}', "not an advisor export"),
         ('{"format": "research-advisor/personal", "version": 999}', "version 999"),
     ],
 )
@@ -205,6 +205,19 @@ def test_junk_is_refused_with_a_reason(
 ) -> None:
     with pytest.raises(ValueError, match=message):
         portable.loads(target, text)
+
+
+def test_an_export_written_before_the_rename_still_loads(
+    conn: sqlite3.Connection, target: sqlite3.Connection
+) -> None:
+    """The program was renamed; files people already exported were not."""
+    seed(conn)
+    data = portable.export(conn)
+    data["format"] = "research-advisor/personal"
+
+    portable.load(target, data)
+
+    assert target.execute("SELECT count(*) FROM library").fetchone()[0] > 0
 
 
 def test_a_refused_import_leaves_nothing_behind(

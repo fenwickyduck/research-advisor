@@ -43,7 +43,9 @@ from advisor.config import Config
 from advisor.embed import store
 from advisor.models import Paper, now, upsert_paper
 
-FORMAT = "research-advisor/corpus"
+FORMAT = "advisor/corpus"
+# As in portable.py: snapshots tagged before the rename still load.
+READABLE = frozenset({FORMAT, "research-advisor/corpus"})
 VERSION = 1
 
 SOURCES = [
@@ -171,7 +173,7 @@ def save(
     return meta
 
 
-DEFAULT_REPO = "fenwickyduck/research-advisor"
+DEFAULT_REPO = "fenwickyduck/advisor"
 
 
 def fetch(destination: Path, repo: str = DEFAULT_REPO, progress: Progress = _silent) -> Path:
@@ -278,7 +280,7 @@ def inspect(path: Path) -> dict[str, Any]:
             raise ValueError("not a corpus snapshot — no metadata")
         meta = json.loads(handle.read().decode("utf-8"))
 
-    if meta.get("format") != FORMAT:
+    if meta.get("format") not in READABLE:
         raise ValueError(f"not a corpus snapshot (format={meta.get('format')!r})")
     if meta.get("version", 0) > VERSION:
         raise ValueError(

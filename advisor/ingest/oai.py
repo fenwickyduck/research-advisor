@@ -22,7 +22,7 @@ import httpx
 from advisor.models import Paper
 
 OAI_NS = "http://www.openarchives.org/OAI/2.0/"
-USER_AGENT = "research-advisor/0.1 (personal reading recommender)"
+USER_AGENT = "advisor/0.1 (personal reading recommender)"
 
 _WS = re.compile(r"\s+")
 

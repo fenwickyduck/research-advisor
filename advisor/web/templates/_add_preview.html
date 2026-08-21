@@ -1,9 +1,10 @@
+{% import "_icons.html" as ico %}
 {# HTMX fragment: what the pasted IDs resolved to, awaiting confirmation. #}
 {% set found = resolved | selectattr("paper") | list %}
 
 {% if unparsed %}
   <div class="warn">
-    <strong>Could not read {{ unparsed | length }} line(s):</strong>
+    <strong>Could not read {{ unparsed | length }} line{{ "" if unparsed|length == 1 else "s" }}:</strong>
     <ul>{% for line in unparsed %}<li><code>{{ line }}</code></li>{% endfor %}</ul>
   </div>
 {% endif %}
@@ -11,19 +12,26 @@
 {% if resolved %}
   <h2>Resolved {{ found | length }} of {{ resolved | length }}</h2>
 
-  <ul class="cards">
+  <ul class="list">
     {% for item in resolved %}
-      <li class="card {{ 'card-error' if not item.paper }}">
-        {% if item.paper %}
-          {% set paper = item.paper %}
-          {% if item.already %}<span class="badge">already in library</span>{% endif %}
-          {% include "_paper.html" %}
-        {% else %}
-          <p><code>{{ item.ref }}</code> —
-            {% if item.error %}lookup failed: {{ item.error }}
-            {% else %}not found at the source{% endif %}
-          </p>
-        {% endif %}
+      <li class="item {{ 'item-error' if not item.paper }}">
+        <div class="gutter">
+          {% if item.already %}<span class="badge">in library</span>
+          {% elif item.paper %}<span class="badge badge-read">new</span>
+          {% else %}<span class="badge badge-down">failed</span>{% endif %}
+        </div>
+        <div class="body">
+          {% if item.paper %}
+            {% set paper = item.paper %}
+            {% include "_paper.html" %}
+          {% else %}
+            <p class="title-plain"><code>{{ item.ref }}</code></p>
+            <p class="byline">
+              {% if item.error %}lookup failed: {{ item.error }}
+              {% else %}not found at the source{% endif %}
+            </p>
+          {% endif %}
+        </div>
       </li>
     {% endfor %}
   </ul>
@@ -31,14 +39,16 @@
   {% if found %}
     <form method="post" action="/add/commit" class="commit">
       <input type="hidden" name="ids" value="{{ raw_ids }}">
-      <label>Add as
+      <label class="select">
+        <span class="select-label">Add as</span>
         <select name="status">
           <option value="read">read</option>
           <option value="queued">queued</option>
           <option value="skipped">skipped</option>
         </select>
+        {{ ico.icon("chevron") }}
       </label>
-      <button type="submit">Add {{ found | length }} to library</button>
+      <button type="submit" class="primary">Add {{ found | length }} to library</button>
     </form>
   {% endif %}
 {% endif %}

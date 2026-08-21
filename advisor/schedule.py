@@ -33,7 +33,7 @@ def systemd_units(command: str, at: str = DEFAULT_TIME) -> tuple[str, str]:
     """The service and timer, as (service_text, timer_text)."""
     service = f"""\
 [Unit]
-Description=Research advisor: harvest, embed and refresh recommendations
+Description=Advisor: harvest, embed and refresh recommendations
 
 [Service]
 Type=oneshot
@@ -45,7 +45,7 @@ IOSchedulingClass=idle
 
     timer = f"""\
 [Unit]
-Description=Nightly research advisor update
+Description=Nightly advisor update
 
 [Timer]
 OnCalendar=*-*-* {at}:00

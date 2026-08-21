@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import io
+import json
 import sqlite3
 
 import numpy as np
@@ -186,6 +188,31 @@ def test_duplicates_are_reported_not_silently_dropped(
 
     assert meta["merged"] == 1
     assert meta["restored"] == 3
+
+
+def test_a_snapshot_tagged_before_the_rename_still_loads(
+    conn: sqlite3.Connection, cfg: Config, tmp_path
+) -> None:
+    """The program was renamed; snapshots already published were not."""
+    import tarfile
+
+    build(conn, cfg)
+    path = tmp_path / "corpus.tar"
+    meta = snapshot.save(conn, cfg, path)
+    meta["format"] = "research-advisor/corpus"
+
+    # Rewrite just the metadata member, leaving the payload alone.
+    old = tmp_path / "old.tar"
+    with tarfile.open(path, "r") as src, tarfile.open(old, "w") as dst:
+        for member in src.getmembers():
+            if member.name == snapshot.META:
+                blob = json.dumps(meta).encode("utf-8")
+                member.size = len(blob)
+                dst.addfile(member, io.BytesIO(blob))
+            else:
+                dst.addfile(member, src.extractfile(member))
+
+    assert snapshot.inspect(old)["format"] == "research-advisor/corpus"
 
 
 def test_junk_is_refused(target, tmp_path) -> None:

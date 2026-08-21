@@ -26,12 +26,14 @@ from advisor.models import Paper, now, upsert_paper
 from advisor.recommend import feedback as fb
 from advisor.recommend import pipeline
 from advisor.recommend import profile as prof
+from advisor.web.render import richtext
 
 HERE = Path(__file__).parent
 
-app = FastAPI(title="Research Advisor")
+app = FastAPI(title="Advisor")
 app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
 templates = Jinja2Templates(directory=HERE / "templates")
+templates.env.filters["richtext"] = richtext
 
 CFG = config.load()
 
@@ -44,8 +46,26 @@ def get_db() -> Iterator[sqlite3.Connection]:
         conn.close()
 
 
+def asset_version() -> str:
+    """Cache-buster for the stylesheet, keyed to the file itself.
+
+    The markup and the stylesheet only make sense together: new markup paired
+    with a browser's cached copy of the old CSS renders as a wall of unstyled
+    SVGs rather than a page. Putting the file's mtime in the URL means a stale
+    copy can never be the one that gets used.
+    """
+    try:
+        return str(int((HERE / "static" / "style.css").stat().st_mtime))
+    except OSError:  # pragma: no cover - only if the install is broken
+        return "0"
+
+
 def _render(request: Request, template: str, **context) -> HTMLResponse:
-    return templates.TemplateResponse(request, template, {"cfg": CFG, **context})
+    return templates.TemplateResponse(
+        request,
+        template,
+        {"cfg": CFG, "asset_version": asset_version(), **context},
+    )
 
 
 def _local(target: str, fallback: str) -> str:

@@ -1,49 +1,61 @@
 {% extends "base.html" %}
-{% block title %}Authors · Research Advisor{% endblock %}
+{% import "_icons.html" as ico %}
+{% block title %}Following · advisor{% endblock %}
 
 {% block content %}
-<div class="page-head"><h1>People you follow</h1></div>
+{% include "_tabs.html" %}
 
-<p class="status-line">
-  Their new work is pulled into every batch by name, whatever it is about —
-  it does not have to resemble anything you have read.
-</p>
+<div class="page-head">
+  <div>
+    <h1>Following</h1>
+    <p class="page-sub">Their new work is pulled into every batch by name, whatever it is
+       about — it does not have to resemble anything you have read.</p>
+  </div>
+</div>
 
 {% if problem %}
-  <div class="warn"><p style="margin:0">{{ problem }}</p></div>
+  <div class="warn">{{ problem }}</div>
 {% endif %}
 
 <form method="post" action="/authors/follow" class="searchbar">
-  <input type="text" name="name" aria-label="Author name">
+  <label class="field">
+    {{ ico.icon("search") }}
+    <input type="text" name="name" placeholder="Author name, as it appears on their papers"
+           aria-label="Author name">
+  </label>
   <button type="submit" class="primary">Follow</button>
 </form>
 
 {% if following %}
-  <ul class="cards">
+  <ul class="rows">
     {% for author in following %}
-      <li class="card follow-row">
-        <span>{{ author.name }}</span>
+      <li>
+        <span class="row-name">{{ author.name }}</span>
         <form method="post" action="/authors/unfollow">
           <input type="hidden" name="name" value="{{ author.name }}">
-          <button type="submit" class="muted">Unfollow</button>
+          <button type="submit" class="act act-quiet">{{ ico.icon("close") }} Unfollow</button>
         </form>
       </li>
     {% endfor %}
   </ul>
 {% else %}
-  <div class="empty"><p>Following nobody yet.</p></div>
+  <div class="empty">
+    <p class="empty-head">Following nobody yet.</p>
+    <p>Follow someone and their new papers appear in every batch, whatever the subject.</p>
+  </div>
 {% endif %}
 
 {% if suggestions %}
   <h2>From your library</h2>
   <p class="hint">Authors whose work you have read more than once.</p>
-  <ul class="cards">
+  <ul class="rows">
     {% for name, count in suggestions %}
-      <li class="card follow-row">
-        <span>{{ name }} <span class="score">{{ count }} papers</span></span>
+      <li>
+        <span class="row-name">{{ name }}
+          <span class="row-note">{{ count }} papers</span></span>
         <form method="post" action="/authors/follow">
           <input type="hidden" name="name" value="{{ name }}">
-          <button type="submit">Follow</button>
+          <button type="submit" class="act">{{ ico.icon("plus") }} Follow</button>
         </form>
       </li>
     {% endfor %}

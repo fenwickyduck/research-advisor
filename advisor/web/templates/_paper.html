@@ -1,30 +1,33 @@
-{# A single paper's metadata block, shared by the feed, the library and the add preview. #}
-<div class="paper">
-  <h3 class="paper-title">
-    {% if paper.url %}<a href="{{ paper.url }}" target="_blank" rel="noopener">{{ paper.title }}</a>
-    {% else %}{{ paper.title }}{% endif %}
-  </h3>
+{# One paper as a row of the reading list, shared by the feed, the library and
+   the add preview. No box of its own: the list rules and the gutter do the
+   separating, so ten of these read as one list rather than ten panels. #}
+<h2 class="title">
+  {% if paper.url %}<a href="{{ paper.url }}" target="_blank" rel="noopener">{{ paper.title }}</a>
+  {% else %}{{ paper.title }}{% endif %}
+</h2>
 
-  <p class="paper-meta">
-    {% if paper.authors %}
-      <span class="authors">
-        {{ paper.authors[:4] | join(", ") }}{% if paper.authors | length > 4 %} +{{ paper.authors | length - 4 }} more{% endif %}
-      </span>
-    {% endif %}
-    {% if paper.published_at %}<span class="dot">·</span><span>{{ paper.published_at[:4] }}</span>{% endif %}
-    {% if paper.venue %}<span class="dot">·</span><span class="venue">{{ paper.venue }}</span>{% endif %}
-  </p>
-
-  {% if paper.abstract %}
-    <details class="abstract">
-      <summary>{{ paper.abstract[:220] }}{% if paper.abstract | length > 220 %}…{% endif %}</summary>
-      <p>{{ paper.abstract }}</p>
-    </details>
+<p class="byline">
+  {% if paper.authors %}
+    <span>{{ paper.authors[:3] | join(", ") }}{% if paper.authors | length > 3 %}
+      <span class="more-authors">+{{ paper.authors | length - 3 }}</span>{% endif %}</span>
   {% endif %}
+  {% if paper.published_at %}<span class="sep">·</span><span>{{ paper.published_at[:4] }}</span>{% endif %}
+  {% if paper.venue %}<span class="sep">·</span><span>{{ paper.venue }}</span>{% endif %}
+</p>
 
-  <p class="paper-links">
-    {% if paper.source_label %}<span class="ident">{{ paper.source_label }}</span>{% endif %}
-    {% if paper.pdf_url %}<a href="{{ paper.pdf_url }}" target="_blank" rel="noopener">PDF</a>{% endif %}
-    {% for category in paper.categories[:3] %}<span class="tag">{{ category }}</span>{% endfor %}
-  </p>
-</div>
+{% if why %}<p class="why-line">{{ why }}</p>{% endif %}
+
+{% if paper.abstract %}
+  <details class="abstract">
+    <summary>{{ paper.abstract[:240] }}{% if paper.abstract | length > 240 %}…{% endif %}</summary>
+    <p>{{ paper.abstract }}</p>
+  </details>
+{% endif %}
+
+<p class="idents">
+  {% if paper.source_label %}<span class="ident">{{ paper.source_label }}</span>{% endif %}
+  {% if paper.pdf_url %}
+    <a class="ident-link" href="{{ paper.pdf_url }}" target="_blank" rel="noopener">PDF</a>
+  {% endif %}
+  {% for category in paper.categories[:3] %}<span class="tag">{{ category }}</span>{% endfor %}
+</p>

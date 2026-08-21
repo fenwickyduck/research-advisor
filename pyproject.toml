@@ -1,7 +1,7 @@
 [project]
-name = "research-advisor"
+name = "advisor"
 version = "0.1.0"
-description = "A personal research advisor: track what you've read, get recommended what to read next."
+description = "A personal advisor for research papers: track what you have read, get recommended what to read next."
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",
@@ -35,7 +35,7 @@ dev = [
 ]
 # Everything, for a machine you actually intend to use this on.
 all = [
-    "research-advisor[embed,mcp]",
+    "advisor[embed,mcp]",
 ]
 
 [project.scripts]

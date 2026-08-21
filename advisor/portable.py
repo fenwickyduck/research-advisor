@@ -24,7 +24,10 @@ from typing import Any
 from advisor import db
 from advisor.models import Paper, now, upsert_paper
 
-FORMAT = "research-advisor/personal"
+FORMAT = "advisor/personal"
+# Files written before the program was renamed carry the old tag. Same format,
+# so keep reading them — an export you already made should not become useless.
+READABLE = frozenset({FORMAT, "research-advisor/personal"})
 VERSION = 1
 
 
@@ -193,9 +196,9 @@ def load(conn: sqlite3.Connection, data: dict[str, Any], replace: bool = False) 
     discarded what was already there would be unrecoverable. ``replace`` is
     the explicit way to say otherwise.
     """
-    if data.get("format") != FORMAT:
+    if data.get("format") not in READABLE:
         raise ValueError(
-            f"not a research-advisor export (format={data.get('format')!r})"
+            f"not an advisor export (format={data.get('format')!r})"
         )
     if data.get("version", 0) > VERSION:
         raise ValueError(

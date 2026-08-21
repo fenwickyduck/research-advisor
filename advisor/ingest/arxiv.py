@@ -30,7 +30,7 @@ from advisor.models import Paper
 SEARCH_API = "https://export.arxiv.org/api/query"
 OAI_API = "https://oaipmh.arxiv.org/oai"
 MIN_INTERVAL = 3.0  # seconds between search-API requests, per arXiv's guidance
-USER_AGENT = "research-advisor/0.1 (personal reading recommender)"
+USER_AGENT = "advisor/0.1 (personal reading recommender)"
 
 ATOM_NS = {
     "atom": "http://www.w3.org/2005/Atom",

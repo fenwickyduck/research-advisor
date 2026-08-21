@@ -1,9 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Feed · Research Advisor{% endblock %}
+{% import "_icons.html" as ico %}
+{% block title %}Feed · advisor{% endblock %}
 
 {% block content %}
 <div class="page-head">
-  <h1>Feed</h1>
+  <div>
+    <h1>Feed</h1>
+    <p class="page-sub">What to read next, drawn from the corpus by what you have read.</p>
+  </div>
   {% if embedded %}
     <form method="post" action="/recommend">
       <button type="submit" class="primary">Get new recommendations</button>
@@ -11,49 +15,53 @@
   {% endif %}
 </div>
 
-<p class="status-line">
-  <strong>{{ library_size }}</strong> in your library ·
-  <strong>{{ corpus_size }}</strong> papers harvested ·
-  <strong>{{ embedded }}</strong> embedded
+<p class="counts">
+  <span><b>{{ "{:,}".format(library_size) }}</b> in your library</span>
+  <span><b>{{ "{:,}".format(corpus_size) }}</b> harvested</span>
+  <span><b>{{ "{:,}".format(embedded) }}</b> embedded</span>
 </p>
 
 {% if recommendations %}
-  <ul class="cards">
+  <ol class="list">
     {% for rec in recommendations %}
       {% set paper = rec.paper %}
-      <li class="card">
-        {% if rec.rationale %}
-          <p class="rationale">{{ rec.rationale }}</p>
-        {% endif %}
-
-        {% include "_paper.html" %}
-
-        <div class="actions">
-          <form method="post" action="/feed/{{ rec.rec_id }}/liked">
-            <button type="submit" title="More like this">&#128077; Interesting</button>
-          </form>
-          <button type="button" title="Less like this"
-                  hx-get="/feed/{{ rec.rec_id }}/why"
-                  hx-target="#why-{{ rec.rec_id }}" hx-swap="innerHTML">
-            &#128078; Not for me
-          </button>
-          <form method="post" action="/feed/{{ rec.rec_id }}/queued">
-            <button type="submit">Read later</button>
-          </form>
-          <form method="post" action="/feed/{{ rec.rec_id }}/dismissed">
-            <button type="submit" class="muted">Dismiss</button>
-          </form>
+      <li class="item">
+        <div class="gutter">
+          <span class="rank">{{ "%02d"|format(loop.index) }}</span>
           {% if rec.score is not none %}
-            <span class="score" title="cosine similarity to your interests">{{ "%.3f"|format(rec.score) }}</span>
+            <span class="match" title="cosine similarity to your interests">
+              {{ "%.2f"|format(rec.score) }}</span>
           {% endif %}
         </div>
-        <div id="why-{{ rec.rec_id }}"></div>
+
+        <div class="body">
+          {% set why = rec.rationale %}
+          {% include "_paper.html" %}
+
+          <div class="acts">
+            <form method="post" action="/feed/{{ rec.rec_id }}/liked">
+              <button type="submit" class="act act-yes">{{ ico.icon("up") }} Interesting</button>
+            </form>
+            <button type="button" class="act"
+                    hx-get="/feed/{{ rec.rec_id }}/why"
+                    hx-target="#why-{{ rec.rec_id }}" hx-swap="innerHTML">
+              {{ ico.icon("down") }} Not for me
+            </button>
+            <form method="post" action="/feed/{{ rec.rec_id }}/queued">
+              <button type="submit" class="act">{{ ico.icon("later") }} Read later</button>
+            </form>
+            <form method="post" action="/feed/{{ rec.rec_id }}/dismissed">
+              <button type="submit" class="act act-quiet">{{ ico.icon("close") }} Dismiss</button>
+            </form>
+          </div>
+          <div id="why-{{ rec.rec_id }}"></div>
+        </div>
       </li>
     {% endfor %}
-  </ul>
+  </ol>
 {% else %}
   <div class="empty">
-    <p>No recommendations yet.</p>
+    <p class="empty-head">No recommendations yet.</p>
     {% if library_size == 0 %}
       <p>Start by telling the advisor what you have already read —
          <a href="/add">paste some arXiv or ePrint IDs</a>. Ten or so is enough to work with.</p>

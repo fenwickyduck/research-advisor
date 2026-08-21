@@ -28,7 +28,7 @@ def user_agent() -> str:
 
     email = (config.load().contact_email or "").strip()
     contact = f"; mailto:{email}" if email else ""
-    return f"research-advisor/0.1 (personal reading recommender{contact})"
+    return f"advisor/0.1 (personal reading recommender{contact})"
 
 _TAGS = re.compile(r"<[^>]+>")
 _WS = re.compile(r"\s+")

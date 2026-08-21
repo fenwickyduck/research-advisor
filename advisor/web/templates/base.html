@@ -1,36 +1,85 @@
+{% set path = request.url.path %}
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Research Advisor{% endblock %}</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <title>{% block title %}Advisor{% endblock %}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/style.css?v={{ asset_version }}">
   <script src="/static/htmx.min.js" defer></script>
 </head>
 <body>
+  <a class="skip" href="#main">Skip to content</a>
+
   <header class="topbar">
-    <a class="brand" href="/">Research Advisor</a>
-    <nav>
-      <a href="/">Feed</a>
-      <a href="/library">Library</a>
-      <a href="/search">Search</a>
-      <a href="/authors">Authors</a>
-      <a href="/add">Add</a>
-      <a href="/profile">Profile</a>
-      <a href="/data">Data</a>
+    <a class="brand" href="/">
+      {% include "_mark.html" %}
+      <span>advisor</span>
+    </a>
+
+    {# The reading loop, in the order you move through it. Everything that is
+       settings rather than reading lives in the menu on the right, so these
+       three stay the whole of the top level. #}
+    <nav class="nav" aria-label="Main">
+      <a href="/"{% if path == "/" %} aria-current="page"{% endif %}>Feed</a>
+      <a href="/library"{% if path.startswith("/library") %} aria-current="page"{% endif %}>Library</a>
+      <a href="/search"{% if path.startswith("/search") %} aria-current="page"{% endif %}>Search</a>
     </nav>
+
+    <div class="topbar-end">
+      <a class="btn btn-primary" href="/add">
+        <span aria-hidden="true">+</span><span class="btn-label">Add papers</span>
+      </a>
+
+      <details class="menu" id="you-menu">
+        <summary>
+          Settings
+          <svg class="caret" width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5 6 8l3-3.5"/></svg>
+        </summary>
+        <div class="menu-panel" role="menu">
+          <a role="menuitem" href="/profile">
+            <strong>Interests</strong><span>What the advisor steers by</span></a>
+          <a role="menuitem" href="/authors">
+            <strong>Following</strong><span>People whose work is always pulled in</span></a>
+          <a role="menuitem" href="/data">
+            <strong>Your data</strong><span>Export, import, what is stored</span></a>
+        </div>
+      </details>
+    </div>
   </header>
 
-  <main>
+  <main id="main">
     {% block content %}{% endblock %}
   </main>
 
   <footer>
-    Paper metadata from the
-    <a href="https://arxiv.org">arXiv API</a> and the
-    <a href="https://eprint.iacr.org">Cryptology ePrint Archive</a>
-    (© IACR and the respective authors), and
-    <a href="https://www.crossref.org">Crossref</a>.
+    <p>Everything here stays on this machine.</p>
+    <p>
+      Paper metadata from the
+      <a href="https://arxiv.org">arXiv API</a> and the
+      <a href="https://eprint.iacr.org">Cryptology ePrint Archive</a>
+      (© IACR and the respective authors), and
+      <a href="https://www.crossref.org">Crossref</a>.
+    </p>
   </footer>
+
+  <script>
+    // The menu is a <details>, so it opens and closes with no script at all.
+    // This only adds the two dismissals a native dropdown would have.
+    (function () {
+      var menu = document.getElementById("you-menu");
+      if (!menu) return;
+      document.addEventListener("click", function (event) {
+        if (menu.open && !menu.contains(event.target)) menu.open = false;
+      });
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && menu.open) {
+          menu.open = false;
+          menu.querySelector("summary").focus();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>

@@ -404,7 +404,7 @@ def _mcp(args: argparse.Namespace) -> int:
         print(
             "Claude Code (the terminal tool; Linux, macOS and Windows)\n"
             "registers the server for you:\n\n"
-            f"  claude mcp add research-advisor -- {command} mcp\n\n"
+            f"  claude mcp add advisor -- {command} mcp\n\n"
             "  Add --scope user to make it available in every directory rather\n"
             "  than only this project. Then start a new 'claude' session — MCP\n"
             "  servers are loaded at startup, so an open session will not see it.\n"
@@ -416,7 +416,7 @@ def _mcp(args: argparse.Namespace) -> int:
         )
         print(mcp_server.client_config(str(command)))
         print(
-            "\nMerge the 'research-advisor' entry into any existing 'mcpServers'\n"
+            "\nMerge the 'advisor' entry into any existing 'mcpServers'\n"
             "object rather than replacing the file."
         )
         return 0
